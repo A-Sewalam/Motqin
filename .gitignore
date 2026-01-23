@@ -6,7 +6,7 @@
 *.sln.docstates
 
 # Settings
-appsettings.Development.json
+Motqin/appsettings.Development.json
 
 # Build results
 bin/
