@@ -5,6 +5,9 @@
 *.userosscache
 *.sln.docstates
 
+# Settings
+Motqin/appsettings.Development.json
+
 # Build results
 bin/
 obj/
