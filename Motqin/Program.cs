@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using Motqin.Data;
 
@@ -22,6 +21,8 @@ namespace Motqin
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             builder.Services.AddScoped<Services.IUsersService, Services.UsersService>();
             builder.Services.AddScoped<Services.ILessonsService, Services.LessonsService>();
+            builder.Services.AddScoped<Services.SubjectsService>();
+            builder.Services.AddScoped<Services.QuestionsService>();
 
             var app = builder.Build();
 

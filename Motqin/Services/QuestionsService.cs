@@ -40,7 +40,7 @@ namespace Motqin.Services
 
             var newQuestion = new MultipleChoiceQuestion()
             {
-                LessonID = questionDto.LessonID, // check for lesson exists firs ???
+                LessonID = questionDto.LessonID,
                 QuestionCategory = questionDto.QuestionCategory,
                 QuestionText = questionDto.QuestionText,
                 DifficultyLevel = questionDto.DifficultyLevel,
@@ -55,9 +55,14 @@ namespace Motqin.Services
 
         public async Task<Question> CreateFillInTheBlankQuestionAsync(FillInTheBlankQuestionDto questionDto)
         {
+            var lessonExists = await _context.Lessons
+                    .AnyAsync(l => l.LessonID == questionDto.LessonID);
+            if (!lessonExists)
+                throw new Exception("Lesson not found");
+
             var newQuestion = new FillInTheBlankQuestion()
             {
-                LessonID = questionDto.LessonID, // check for lesson exists firs ???
+                LessonID = questionDto.LessonID,
                 QuestionCategory = questionDto.QuestionCategory,
                 QuestionText = questionDto.QuestionText,
                 DifficultyLevel = questionDto.DifficultyLevel,
@@ -79,8 +84,47 @@ namespace Motqin.Services
             existing.LessonID = question.LessonID;
             existing.QuestionText = question.QuestionText;
             existing.DifficultyLevel = question.DifficultyLevel;
+            existing.QuestionCategory = question.QuestionCategory;
 
             _context.Questions.Update(existing);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // New: update derived MultipleChoiceQuestion fully
+        public async Task<bool> UpdateMultipleChoiceQuestionAsync(MultipleChoiceQuestionDto dto)
+        {
+            var existing = await _context.Questions
+                                         .OfType<MultipleChoiceQuestion>()
+                                         .FirstOrDefaultAsync(q => q.QuestionID == dto.QuestionID);
+            if (existing is null) return false;
+
+            existing.LessonID = dto.LessonID;
+            existing.QuestionCategory = dto.QuestionCategory;
+            existing.QuestionText = dto.QuestionText;
+            existing.DifficultyLevel = dto.DifficultyLevel;
+            existing.AnswerOptions = dto.AnswerOptions;
+            existing.CorrectAnswer = dto.CorrectAnswer;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // New: update derived FillInTheBlankQuestion fully
+        public async Task<bool> UpdateFillInTheBlankQuestionAsync(FillInTheBlankQuestionDto dto)
+        {
+            var existing = await _context.Questions
+                                         .OfType<FillInTheBlankQuestion>()
+                                         .FirstOrDefaultAsync(q => q.QuestionID == dto.QuestionID);
+            if (existing is null) return false;
+
+            existing.LessonID = dto.LessonID;
+            existing.QuestionCategory = dto.QuestionCategory;
+            existing.QuestionText = dto.QuestionText;
+            existing.DifficultyLevel = dto.DifficultyLevel;
+            existing.CorrectText = dto.CorrectText;
+            existing.CaseSensitive = dto.CaseSensitive;
+
             await _context.SaveChangesAsync();
             return true;
         }
