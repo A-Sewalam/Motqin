@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Motqin.Services;
 using Motqin.Dtos.Subject;
+using Motqin.Enums;
 using Motqin.Models;
+using Motqin.Services;
 
 namespace Motqin.Controllers
 {
@@ -29,6 +30,20 @@ namespace Motqin.Controllers
             var item = await _subjectsService.GetByIdAsync(id);
             if (item is null) return NotFound();
             return Ok(item);
+        }
+
+        [HttpGet] // chek this endpoint
+        public async Task<ActionResult<IEnumerable<SubjectDto>>> GetBySubjectId(string country, GradeLevel gradeLevel, EducationalStage educationalStage)
+        {
+            var subjects = await subjectsService.GetAllAsync(country, gradeLevel, educationalStage);
+            return Ok(subjects.Select(s => new SubjectDto
+            {
+                SubjectID = s.SubjectID,
+                Name = s.Name,
+                Country = s.Country,
+                EducationalStage = s.EducationalStage,
+                GradeLevel = s.GradeLevel
+            }));
         }
 
         [HttpPost]

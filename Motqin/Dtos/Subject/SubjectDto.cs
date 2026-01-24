@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Motqin.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Motqin.Dtos.Subject
 {
@@ -6,16 +7,16 @@ namespace Motqin.Dtos.Subject
     {
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [StringLength(100)]
-        public string Country { get; set; }
+        public required string Country { get; set; }
 
         [StringLength(50)]
-        public string EducationalStage { get; set; }
+        public EducationalStage EducationalStage { get; set; }
 
         [StringLength(50)]
-        public string GradeLevel { get; set; }
+        public GradeLevel GradeLevel { get; set; }
 
     }
 }
