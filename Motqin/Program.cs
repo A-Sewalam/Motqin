@@ -22,6 +22,7 @@ namespace Motqin
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             builder.Services.AddScoped<Services.IUsersService, Services.UsersService>();
             builder.Services.AddScoped<Services.ILessonsService, Services.LessonsService>();
+            builder.Services.AddScoped<Services.ISubjectsService, Services.SubjectsService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
