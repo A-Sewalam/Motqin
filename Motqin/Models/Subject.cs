@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Motqin.Enums;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Motqin.Models
@@ -10,16 +11,16 @@ namespace Motqin.Models
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [StringLength(100)]
-        public string Country { get; set; }
+        public required string Country { get; set; }
 
         [StringLength(50)]
-        public string EducationalStage { get; set; }
+        public EducationalStage EducationalStage { get; set; }
 
         [StringLength(50)]
-        public string GradeLevel { get; set; }
+        public GradeLevel GradeLevel { get; set; }
 
         // Navigation Property
         public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
