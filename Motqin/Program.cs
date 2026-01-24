@@ -21,6 +21,7 @@ namespace Motqin
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
             builder.Services.AddScoped<Services.IUsersService, Services.UsersService>();
+            builder.Services.AddScoped<Services.ILessonsService, Services.LessonsService>();
 
             var app = builder.Build();
 
