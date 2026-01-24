@@ -26,7 +26,6 @@ namespace Motqin.Data
                         EducationalStage = "Secondary",
                         GradeLevel = "Third Year"
                     });
-
                     context.SaveChanges();
                 }
 
@@ -41,17 +40,14 @@ namespace Motqin.Data
                         new Lesson
                         {
                             SubjectID = englishSubject.SubjectID,
-                            Title = "Grammar: Conditional Sentences",
-                            
+                            Title = "Grammar: Conditional Sentences"
                         },
                         new Lesson
                         {
                             SubjectID = englishSubject.SubjectID,
-                            Title = "Vocabulary: Science and Technology",
-                           
+                            Title = "Vocabulary: Science and Technology"
                         }
                     );
-
                     context.SaveChanges();
                 }
 
@@ -81,7 +77,6 @@ namespace Motqin.Data
                             GradeLevel = "Third Secondary"
                         }
                     );
-
                     context.SaveChanges();
                 }
 
@@ -97,6 +92,7 @@ namespace Motqin.Data
                         new MultipleChoiceQuestion
                         {
                             LessonID = lesson1.LessonID,
+                            QuestionCategory = "Basic",
                             QuestionText = "If I study hard, I ____ pass the exam.",
                             AnswerOptions = "[\"will\",\"would\",\"had\",\"have\"]",
                             CorrectAnswer = "will",
@@ -106,13 +102,13 @@ namespace Motqin.Data
                         new FillInTheBlankQuestion
                         {
                             LessonID = lesson2.LessonID,
+                            QuestionCategory = "Middle",
                             QuestionText = "Technology has made our lives _____.",
                             CorrectText = "easier",
                             CaseSensitive = false,
                             DifficultyLevel = "Easy"
                         }
                     );
-
                     context.SaveChanges();
                 }
 
@@ -127,11 +123,11 @@ namespace Motqin.Data
                     {
                         UserID = user.UserId,
                         LessonID = lesson1.LessonID,
+                        QuestionsCategory = "Basic",
                         StartTime = DateTime.Now.AddMinutes(-30),
                         EndTime = DateTime.Now,
                         Score = 80
                     });
-
                     context.SaveChanges();
                 }
 
@@ -151,7 +147,6 @@ namespace Motqin.Data
                         UserAnswer = "will",
                         IsCorrect = true
                     });
-
                     context.SaveChanges();
                 }
 
@@ -168,7 +163,6 @@ namespace Motqin.Data
                         ReviewInterval = 3,
                         Status = "Active"
                     });
-
                     context.SaveChanges();
                 }
             }
