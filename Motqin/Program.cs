@@ -20,7 +20,7 @@ namespace Motqin
             //Configure DBContext with SQL
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
-
+            builder.Services.AddScoped<Services.IUsersService, Services.UsersService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
