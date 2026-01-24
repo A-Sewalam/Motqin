@@ -10,6 +10,9 @@ public abstract class Question
     public int LessonID { get; set; }
 
     [Required]
+    public string QuestionCategory { get; set; }
+
+    [Required]
     public string QuestionText { get; set; }
 
     [StringLength(20)]
