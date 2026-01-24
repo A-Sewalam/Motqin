@@ -16,6 +16,9 @@ namespace Motqin.Models
         [Required]
         public int LessonID { get; set; }
 
+        [Required]
+        public string QuestionsCategory { get; set; }
+
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public int Score { get; set; }
