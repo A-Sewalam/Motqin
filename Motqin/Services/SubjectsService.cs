@@ -8,6 +8,7 @@ namespace Motqin.Services
 {
     public interface ISubjectsService
     {
+        Task<List<Subject>> GetAllAsync();
         Task<List<Subject>?> GetByUserGradeLevelAsync(int userId);
         Task<Subject?> GetByIdAsync(int id);
         Task<Subject> CreateAsync(SubjectDto subjectDto);
@@ -24,6 +25,9 @@ namespace Motqin.Services
         {
             _context = context;
         }
+
+        public async Task<List<Subject>> GetAllAsync() =>
+            await _context.Subjects.AsNoTracking().ToListAsync();
 
         // New: get subjects matching the user's grade level.
         // Returns null if user not found; returns empty list if user has no grade or no matching subjects.
