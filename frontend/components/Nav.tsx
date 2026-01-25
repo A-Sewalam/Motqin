@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { ThemeToggle } from "./ThemeToggle";
+export const dynamic = "force-dynamic";
 
 const Nav = () => {
   const [session, setSession] = useState(false);
@@ -10,8 +12,12 @@ const Nav = () => {
   const [toggleLogoMenu, setToggleLogoMenu] = useState(false);
 
   return (
-    <nav className=" bg-blue-600 flex items-center justify-between w-full px-6 py-4 border-b relative">
-      
+    <nav className="
+    flex items-center justify-between w-full px-6 py-4 relative
+    bg-[var(--background)]
+    border-b border-zinc-200 dark:border-zinc-800
+    transition-colors duration-300
+  ">
       {/* Logo + Dropdown */}
       <div className="relative">
         <button
@@ -29,7 +35,7 @@ const Nav = () => {
         </button>
 
         {toggleLogoMenu && (
-          <div className="absolute left-0 top-12 w-44 bg-white shadow-md rounded-md flex flex-col z-50">
+          <div className="absolute left-0 top-12 w-44 dark:bg-amber-400 bg-white shadow-md rounded-md flex flex-col z-50">
             <Link
               href="/dashboard"
               className="dropdown_link"
@@ -78,12 +84,14 @@ const Nav = () => {
                 className="rounded-full cursor-pointer"
               />
             </Link>
+            <ThemeToggle />
             <button onClick={() => setSession(false)} className="black_btn">
               Sign Out
             </button>
           </>
         ) : (
           <>
+            <ThemeToggle />
             <Link href="/sign-in" className="outline_btn">
               Sign In
             </Link>
