@@ -12,6 +12,6 @@ namespace Motqin.Dtos.User
         [Required, MinLength(8)]
         public string Password { get; set; } = string.Empty; 
         public string? Role { get; set; }
-        public GradeLevel? GradeLevel { get; set; }
+        public GradeLevel GradeLevel { get; set; }
     }
 }

@@ -11,6 +11,6 @@ namespace Motqin.Dtos.User
 
         public string? Role { get; set; }
 
-        public GradeLevel? GradeLevel { get; set; }
+        public GradeLevel GradeLevel { get; set; }
     }
 }

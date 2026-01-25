@@ -21,11 +21,11 @@ namespace Motqin.Models
         public string? Role { get; set; }
 
         [StringLength(100)]
-        public  string? Country { get; set; }
+        public  string Country { get; set; }
 
         [StringLength(50)]
-        public EducationalStage? EducationalStage { get; set; }
-        public GradeLevel? GradeLevel { get; set; }
+        public EducationalStage EducationalStage { get; set; }
+        public GradeLevel GradeLevel { get; set; }
 
         // Navigation properties
         public virtual ICollection<StudySession> StudySessions { get; set; } = [];
