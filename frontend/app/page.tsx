@@ -5,7 +5,6 @@ import {
   BookOpen,
   ShieldOff,
   CalendarCheck,
-  Medal,
 } from "lucide-react";
 import Link from "next/link";
 

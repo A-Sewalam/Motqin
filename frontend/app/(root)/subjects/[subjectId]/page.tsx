@@ -20,7 +20,7 @@ const SubjectPage = async ({ params }: SubjectPageProps) => {
           description="Algebra, calculus, and problem solving"
           hours={18}
           state="continue"
-          href="/subjects/math"
+          href="/Ai-Teacher"
         />
       </div>
     </div>
