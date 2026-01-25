@@ -24,11 +24,21 @@ namespace Motqin.Services
                                  .FirstOrDefaultAsync(q => q.QuestionID == id);
         }
 
-        public async Task<List<Question>> GetByLessonIdAsync(int lessonId) =>
-            await _context.Questions
+        public async Task<List<Question>> GetByLessonIdAsync(int lessonId)
+        {
+            return await _context.Questions
                           .Where(q => q.LessonID == lessonId)
                           .AsNoTracking()
                           .ToListAsync();
+        }
+            
+        public async Task<List<Question>> GetByCategoryAndLessonIdAsync(string category, int lessonId)
+        {
+            return await _context.Questions
+                            .Where(q => q.QuestionCategory == category && q.LessonID == lessonId)
+                            .AsNoTracking()
+                            .ToListAsync();
+        }
 
         // return type Question or MultipleChoiceQuestion (??)
         public async Task<Question> CreateMultipleChoiceQuestionAsync(MultipleChoiceQuestionDto questionDto)

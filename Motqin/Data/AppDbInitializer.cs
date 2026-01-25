@@ -66,7 +66,7 @@ namespace Motqin.Data
                             Email = "ahmed@student.com",
                             PasswordHash = "HASHED_PASSWORD",
                             Role = "Student",
-                            GradeLevel = "Third Secondary"
+                            GradeLevel = Enums.GradeLevel.Third
                         },
                         new User
                         {
@@ -74,7 +74,7 @@ namespace Motqin.Data
                             Email = "sara@student.com",
                             PasswordHash = "HASHED_PASSWORD",
                             Role = "Student",
-                            GradeLevel = "Third Secondary"
+                            GradeLevel = Enums.GradeLevel.Third
                         }
                     );
                     context.SaveChanges();

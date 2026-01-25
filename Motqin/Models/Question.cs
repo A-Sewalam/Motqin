@@ -10,7 +10,7 @@ public abstract class Question
     public int LessonID { get; set; }
 
     [Required]
-    public string QuestionCategory { get; set; }  // هل ده نوع السؤال ولا Exam / Practice / Revision
+    public string QuestionCategory { get; set; }  // Basic / Advanced
 
     [Required]
     public string QuestionText { get; set; }
