@@ -15,7 +15,7 @@ const Nav = () => {
     <nav className="
     flex items-center justify-between w-full px-6 py-4 relative
     bg-[var(--background)]
-    border-b border-zinc-200 dark:border-zinc-800
+     border-zinc-200 dark:border-zinc-800
     transition-colors duration-300
   ">
       {/* Logo + Dropdown */}
@@ -27,8 +27,8 @@ const Nav = () => {
           <Image
             src="/my-notion-face-portrait.png"
             alt="Logo"
-            width={32}
-            height={32}
+            width={42}
+            height={42}
             className="rounded-full"
           />
           <span className="font-bold text-lg">Mono</span>

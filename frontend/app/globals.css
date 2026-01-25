@@ -1,17 +1,67 @@
 @import "tailwindcss";
 
+/* =========================
+   DESIGN TOKENS
+========================= */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --surface: #f4f4f5;
 }
 
 .dark {
   --background: #0a0a0a;
   --foreground: #ededed;
+  --surface: #18181b;
 }
 
+/* =========================
+   BASE STYLES
+========================= */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* =========================
+   COMPONENTS (IMPORTANT)
+========================= */
+@layer components {
+  .outline_btn {
+    @apply inline-flex items-center justify-center
+      rounded-full px-4 py-2
+      text-lg font-semibold
+      border-4  transition-all duration-200;
+
+    background-color: transparent;
+    color: var(--foreground);
+    border-color: color-mix(in srgb, var(--foreground) 80%, transparent);
+  }
+
+  .outline_btn:hover {
+    background-color: color-mix(in srgb, var(--foreground) 6%, transparent);
+  }
+
+  .outline_btn:active {
+    transform: translateY(1px);
+  }
+
+  .black_btn {
+    @apply inline-flex items-center justify-center
+      rounded-full px-4 py-2
+      text-lg font-semibold
+      transition-all duration-200;
+
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+
+  .black_btn:hover {
+    background-color: color-mix(in srgb, var(--foreground) 85%, black);
+  }
+
+  .black_btn:active {
+    transform: translateY(1px);
+  }
 }
