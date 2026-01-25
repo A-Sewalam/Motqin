@@ -95,35 +95,18 @@ namespace Motqin.Services
                                      .AsNoTracking()
                                      .FirstOrDefaultAsync(u => u.UserId == userId);
 
-            if (user is null) return null;
+            if (user is null)
+                return null;
 
-            if (string.IsNullOrWhiteSpace(user.GradeLevel))
-                return new List<Subject>();
-
-            // Try parse grade level as enum name (case-insensitive)
-            if (!Enum.TryParse<GradeLevel>(user.GradeLevel, true, out var gradeEnum))
-            {
-                // If parsing by name failed, try numeric parse (stored as "1","2",...)
-                if (byte.TryParse(user.GradeLevel, out var numeric))
-                {
-                    if (Enum.IsDefined(typeof(GradeLevel), numeric))
-                        gradeEnum = (GradeLevel)numeric;
-                    else
-                        return new List<Subject>();
-                }
-                else
-                {
-                    // Unknown format -> return empty list
-                    return new List<Subject>();
-                }
-            }
+            var gradeLevel = user.GradeLevel;
 
             var subjects = await _context.Subjects
                                          .AsNoTracking()
-                                         .Where(s => s.GradeLevel == gradeEnum)
+                                         .Where(s => s.GradeLevel == gradeLevel)
                                          .ToListAsync();
 
             return subjects;
         }
+
     }
 }
