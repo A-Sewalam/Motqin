@@ -17,13 +17,6 @@ namespace Motqin.Controllers
             _subjectsService = service;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Subject>>> GetAll()
-        {
-            var items = await _subjectsService.GetAllAsync();
-            return Ok(items);
-        }
-
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Subject>> GetById(int id)
         {

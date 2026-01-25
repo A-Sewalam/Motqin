@@ -29,7 +29,7 @@ namespace Motqin
             var app = builder.Build();
 
             //Seeding after build
-            AppDbInitializer.Seed(app);
+            //AppDbInitializer.Seed(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
