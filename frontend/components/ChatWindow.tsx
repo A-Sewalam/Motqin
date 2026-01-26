@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Message } from "./ChatLayout";
+import { Message } from "./ChatLayout.client";
 import { cn } from "@/app/lib/utils";
 
 interface ChatWindowProps {
@@ -8,7 +8,7 @@ interface ChatWindowProps {
 
 export const ChatWindow = ({ messages }: ChatWindowProps) => {
   return (
-    <div className="h-[80%] overflow-y-auto px-6 py-8 space-y-6">
+    <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6 bg-[var(--surface)] transition-colors">
       {messages.map((msg) => (
         <div
           key={msg.id}
@@ -20,10 +20,10 @@ export const ChatWindow = ({ messages }: ChatWindowProps) => {
           {/* AI avatar */}
           {msg.role === "assistant" && (
             <Image
-              src="/ai-teacher.png" // put image in /public
+              src="/view-3d-male-lawyer-suit.jpg"
               alt="AI Teacher"
-              width={32}
-              height={32}
+              width={52}
+              height={52}
               className="rounded-full"
             />
           )}
@@ -31,13 +31,29 @@ export const ChatWindow = ({ messages }: ChatWindowProps) => {
           {/* Message bubble */}
           <div
             className={cn(
-              "max-w-xl px-4 py-3 rounded-2xl text-sm leading-relaxed",
+              "max-w-xl px-4 py-3 rounded-2xl text-lg leading-relaxed whitespace-pre-line",
               msg.role === "user"
                 ? "bg-blue-600 text-white rounded-br-md"
-                : "bg-white dark:bg-zinc-800 border dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 rounded-bl-md"
+                : `
+                  bg-[var(--assistant-bg)]
+                  text-[var(--assistant-text)]
+                  border border-zinc-200 dark:border-zinc-700
+                  rounded-bl-md
+                `
             )}
           >
-            {msg.content}
+            {/* Text */}
+            <p>{msg.content}</p>
+
+            {/* 🔊 Audio (assistant only) */}
+            {msg.role === "assistant" && msg.audioUrl && (
+              <audio
+                src={msg.audioUrl}
+                controls
+                preload="none"
+                className="mt-3 w-full max-w-xs"
+              />
+            )}
           </div>
         </div>
       ))}

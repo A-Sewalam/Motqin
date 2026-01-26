@@ -91,6 +91,9 @@ const Nav = () => {
           </>
         ) : (
           <>
+            <Link href="/" className="text-lg font-semibold text-blakc">
+              Home
+            </Link>
             <ThemeToggle />
             <Link href="/sign-in" className="outline_btn">
               Sign In

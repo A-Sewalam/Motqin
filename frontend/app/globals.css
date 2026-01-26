@@ -6,13 +6,35 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --surface: #f4f4f5;
+  --surface: #e1e1ec;
+  --assistant-bg: #ffffff;
+  --assistant-text: #18181b;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #18181b;
+  --sidebar-hover: #f4f4f5;
+  --input-bg: #ffffff;
+  --input-text: #18181b;
+  --input-border: #d4d4d8;
+  --input-placeholder: #71717a;
+
+  --chat-toolbar-bg: #ffffff;
 }
 
 .dark {
   --background: #0a0a0a;
   --foreground: #ededed;
   --surface: #18181b;
+  --assistant-bg: #1c1c1f;
+  --assistant-text: #e5e7eb;
+  --sidebar-bg: #0f0f12;
+  --sidebar-text: #e5e7eb;
+  --sidebar-hover: #1f1f23;
+    --input-bg: #18181b;
+  --input-text: #e5e7eb;
+  --input-border: #3f3f46;
+  --input-placeholder: #a1a1aa;
+
+  --chat-toolbar-bg: #0f0f12;
 }
 
 /* =========================
