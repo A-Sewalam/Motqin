@@ -1,12 +1,22 @@
 import { FeatureCard } from "@/components/FeautureCard";
 import { Trophy, Bot, BookOpen, ShieldOff, CalendarCheck } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   const isLoggedIn = true;
   return (
     <div className="flex min-h-screen items-center justify-center  bg-[var(--surface)] font-sans ">
-      <main className="flex min-h-screen w-full flex-col items-center justify-between py-16 px-16  bg-[var(--surface)] sm:items-start">
+      <main className="flex min-h-screen w-full flex-col items-center  py-16 px-16  bg-[var(--surface)] sm:items-start">
+        {/* <div className="flex items-center justify-center h-[40vh]">
+          <Image
+            src="/logo.svg"
+            alt="Motqin Logo"
+            width={700}
+            height={100}
+            priority
+          />
+        </div> */}
         <section className="mt-1 w-full  grid grid-cols-10 gap-6 auto-rows-[80px]">
           {/* Planner - Hero Card (spans 4 cols, 2 rows) */}
           <Link href="/planner" className="col-span-7 row-span-4 rounded-3xl">

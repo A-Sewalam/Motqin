@@ -10,7 +10,7 @@ const SubjectsPage = () => {
       <div className="flex-col gap-20 m-5 px-7">
         <SubjectCardClient
           title="Mathematics"
-          description="Algebra, calculus, and problem solving"
+          // description="Algebra, calculus, and problem solving"
           lessons={24}
           hours={18}
           href="/subjects/math"
@@ -18,9 +18,30 @@ const SubjectsPage = () => {
         />
         <SubjectCardClient
           title="Physics"
-          description="Mechanics, waves, and thermodynamics"
+          // description="Mechanics, waves, and thermodynamics"
           lessons={16}
           hours={12}
+          href="/subjects/physics"
+        />
+        <SubjectCardClient
+          title="English"
+          // description="Mechanics, waves, and thermodynamics"
+          lessons={12}
+          hours={7}
+          href="/subjects/physics"
+        />
+        <SubjectCardClient
+          title="Arabic"
+          // description="Mechanics, waves, and thermodynamics"
+          lessons={22}
+          hours={30}
+          href="/subjects/physics"
+        />
+        <SubjectCardClient
+          title="Chemistry"
+          // description="Mechanics, waves, and thermodynamics"
+          lessons={17}
+          hours={22}
           href="/subjects/physics"
         />
       </div>

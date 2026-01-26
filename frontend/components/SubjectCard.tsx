@@ -4,7 +4,7 @@ import { AnimatedArrow } from "./AnimatedArrow";
 
 interface SubjectCardProps {
   title: string;
-  description?: string;
+  // description?: string;
   lessons: number;
   hours: number;
   href: string;
@@ -14,7 +14,7 @@ interface SubjectCardProps {
 
 export const SubjectCard = ({
   title,
-  description,
+  // description,
   lessons,
   hours,
   href,
@@ -33,12 +33,12 @@ export const SubjectCard = ({
       )}
     >
       {/* Main content */}
-      <div className="flex-1 p-3">
+      <div className="flex-1 p-6">
         <h2 className="text-xl font-bold text-zinc-900">{title}</h2>
 
-        {description && (
+        {/* {description && (
           <p className="text-sm text-zinc-600 mt-1 max-w-md">{description}</p>
-        )}
+        )} */}
 
         <div className="flex gap-6 mt-6 text-sm text-zinc-700">
           <div>

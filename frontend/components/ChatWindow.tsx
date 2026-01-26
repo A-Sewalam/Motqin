@@ -1,12 +1,20 @@
 import Image from "next/image";
 import { Message } from "./ChatLayout.client";
 import { cn } from "@/app/lib/utils";
+import { useEffect, useRef } from "react";
 
 interface ChatWindowProps {
   messages: Message[];
 }
 
 export const ChatWindow = ({ messages }: ChatWindowProps) => {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
   return (
     <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6 bg-[var(--surface)] transition-colors">
       {messages.map((msg) => (
@@ -57,6 +65,7 @@ export const ChatWindow = ({ messages }: ChatWindowProps) => {
           </div>
         </div>
       ))}
+      <div ref={bottomRef} />
     </div>
   );
 };
