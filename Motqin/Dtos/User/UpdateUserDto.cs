@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Motqin.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Motqin.Dtos.User
 {
@@ -10,6 +11,6 @@ namespace Motqin.Dtos.User
 
         public string? Role { get; set; }
 
-        public string? GradeLevel { get; set; }
+        public GradeLevel GradeLevel { get; set; }
     }
 }

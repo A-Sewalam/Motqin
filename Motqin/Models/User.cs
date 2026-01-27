@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Motqin.Enums;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Motqin.Models
@@ -18,7 +19,13 @@ namespace Motqin.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         public string? Role { get; set; }
-        public string? GradeLevel { get; set; }
+
+        [StringLength(100)]
+        public  string Country { get; set; }
+
+        [StringLength(50)]
+        public EducationalStage EducationalStage { get; set; }
+        public GradeLevel GradeLevel { get; set; }
 
         // Navigation properties
         public virtual ICollection<StudySession> StudySessions { get; set; } = [];

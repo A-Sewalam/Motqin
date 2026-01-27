@@ -8,14 +8,13 @@ namespace Motqin.Services
 {
     public interface ISubjectsService
     {
-        Task<IEnumerable<Subject>> GetAllAsync(string country, GradeLevel gradeLevel, EducationalStage educationalStage);
         Task<List<Subject>> GetAllAsync();
+        Task<List<Subject>?> GetByUserGradeLevelAsync(int userId);
         Task<Subject?> GetByIdAsync(int id);
         Task<Subject> CreateAsync(SubjectDto subjectDto);
         Task<bool> UpdateAsync(Subject subject);
         Task<bool> DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
-        Task<List<Subject>?> GetByUserGradeLevelAsync(int userId);
     }
 
     public class SubjectsService : ISubjectsService
@@ -27,13 +26,29 @@ namespace Motqin.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Subject>> GetAllAsync(string country, GradeLevel gradeLevel, EducationalStage educationalStage) =>
-            await _context.Subjects.Where(s => s.Country == country && s.GradeLevel == gradeLevel && s.EducationalStage == educationalStage)
-                                    .AsNoTracking().ToListAsync();
-
-        // pagination in the future
         public async Task<List<Subject>> GetAllAsync() =>
             await _context.Subjects.AsNoTracking().ToListAsync();
+
+        // New: get subjects matching the user's grade level.
+        // Returns null if user not found; returns empty list if user has no grade or no matching subjects.
+        public async Task<List<Subject>?> GetByUserGradeLevelAsync(int userId)
+        {
+            var user = await _context.Users
+                                     .AsNoTracking()
+                                     .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user is null)
+                return null;
+
+            var country = user.Country;
+            var gradeLevel = user.GradeLevel;
+            var educationalStage = user.EducationalStage;
+
+
+            var subjects = await GetAllAsync(country, gradeLevel, educationalStage);
+
+            return subjects;
+        }
 
         public async Task<Subject?> GetByIdAsync(int id)
         {
@@ -87,43 +102,8 @@ namespace Motqin.Services
         public async Task<bool> ExistsAsync(int id) =>
             await _context.Subjects.AnyAsync(s => s.SubjectID == id);
 
-        // New: get subjects matching the user's grade level.
-        // Returns null if user not found; returns empty list if user has no grade or no matching subjects.
-        public async Task<List<Subject>?> GetByUserGradeLevelAsync(int userId)
-        {
-            var user = await _context.Users
-                                     .AsNoTracking()
-                                     .FirstOrDefaultAsync(u => u.UserId == userId);
-
-            if (user is null) return null;
-
-            if (string.IsNullOrWhiteSpace(user.GradeLevel))
-                return new List<Subject>();
-
-            // Try parse grade level as enum name (case-insensitive)
-            if (!Enum.TryParse<GradeLevel>(user.GradeLevel, true, out var gradeEnum))
-            {
-                // If parsing by name failed, try numeric parse (stored as "1","2",...)
-                if (byte.TryParse(user.GradeLevel, out var numeric))
-                {
-                    if (Enum.IsDefined(typeof(GradeLevel), numeric))
-                        gradeEnum = (GradeLevel)numeric;
-                    else
-                        return new List<Subject>();
-                }
-                else
-                {
-                    // Unknown format -> return empty list
-                    return new List<Subject>();
-                }
-            }
-
-            var subjects = await _context.Subjects
-                                         .AsNoTracking()
-                                         .Where(s => s.GradeLevel == gradeEnum)
-                                         .ToListAsync();
-
-            return subjects;
-        }
+        private async Task<List<Subject>> GetAllAsync(string country, GradeLevel gradeLevel, EducationalStage educationalStage) =>
+            await _context.Subjects.Where(s => s.Country == country && s.GradeLevel == gradeLevel && s.EducationalStage == educationalStage)
+                                    .AsNoTracking().ToListAsync();
     }
 }

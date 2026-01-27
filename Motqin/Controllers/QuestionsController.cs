@@ -31,10 +31,17 @@ namespace Motqin.Controllers
             return Ok(item);
         }
 
-        [HttpGet("lesson/{lessonId:int}")]
+        [HttpGet("get-by-lesson")]
         public async Task<ActionResult<IEnumerable<Question>>> GetByLesson(int lessonId)
         {
             var items = await _questionsService.GetByLessonIdAsync(lessonId);
+            return Ok(items);
+        }
+
+        [HttpGet("get-by-category-and-lesson")]
+        public async Task<ActionResult<IEnumerable<Question>>> GetByCategoryAndLesson(string category, int lessonId)
+        {
+            var items = await _questionsService.GetByCategoryAndLessonIdAsync(category, lessonId);
             return Ok(items);
         }
 

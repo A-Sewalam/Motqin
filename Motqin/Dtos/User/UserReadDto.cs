@@ -1,4 +1,6 @@
-﻿namespace Motqin.Dtos.User
+﻿using Motqin.Enums;
+
+namespace Motqin.Dtos.User
 {
     public class UserReadDto
     {
@@ -6,6 +8,6 @@
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? Role { get; set; }
-        public string? GradeLevel { get; set; }
+        public GradeLevel? GradeLevel { get; set; }
     }
 }
