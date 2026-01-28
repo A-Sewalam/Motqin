@@ -64,7 +64,7 @@ namespace Motqin.Data
                 .WithMany(l => l.Questions)
                 .HasForeignKey(q => q.LessonID)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            
             // -------------------------------------------------
             // User → StudySession (1 : Many)
             // -------------------------------------------------
@@ -145,6 +145,16 @@ namespace Motqin.Data
                 .WithMany(u => u.CompetitionEntries)
                 .HasForeignKey(ce => ce.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
+            // -------------------------------------------------
+            // Subject → GradeLevel & EducationalStage (Enums)
+            // -------------------------------------------------
+            modelBuilder.Entity<Subject>()
+                .Property(s => s.EducationalStage)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Subject>()
+                .Property(s => s.GradeLevel)
+                .HasConversion<string>();
         }
     }
 }

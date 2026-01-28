@@ -14,6 +14,14 @@ namespace Motqin.Data
             {
                 var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
 
+                if (context == null)
+                {
+                    throw new Exception("DbContext not found in Service Provider");
+                }
+
+                // Ensure the database exists before querying .Any()
+                context.Database.EnsureCreated();
+
                 // =========================
                 // SUBJECT
                 // =========================
@@ -29,7 +37,7 @@ namespace Motqin.Data
                     context.SaveChanges();
                 }
 
-                var englishSubject = context.Subjects.First();
+                var englishSubject = context.Subjects.FirstOrDefault();
 
                 // =========================
                 // LESSONS

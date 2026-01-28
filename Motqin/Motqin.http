@@ -4,3 +4,7 @@ GET {{Motqin_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+GET {{Motqin_HostAddress}}/users/
+Accept: application/json
+
+###
