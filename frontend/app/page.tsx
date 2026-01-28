@@ -6,17 +6,18 @@ import Link from "next/link";
 export default function Home() {
   const isLoggedIn = true;
   return (
-    <div className="flex min-h-screen items-center justify-center  bg-[var(--surface)] font-sans ">
-      <main className="flex min-h-screen w-full flex-col items-center  py-16 px-16  bg-[var(--surface)] sm:items-start">
-        {/* <div className="flex items-center justify-center h-[40vh]">
+    // <div className="min-h-screen  bg-[var(--surface)] f ">
+      <main className="flex min-h-screen w-full flex-col items-center  py-16 px-16  bg-[var(--surface)] sm:items-start font-sans">
+        <div className="flex items-center justify-center h-[50vh] w-full pr-20">
           <Image
-            src="/logo.svg"
+            // src="/logo.svg"
+            src="/متقن.svg"
             alt="Motqin Logo"
             width={700}
             height={100}
             priority
           />
-        </div> */}
+        </div>
         <section className="mt-1 w-full  grid grid-cols-10 gap-6 auto-rows-[80px]">
           {/* Planner - Hero Card (spans 4 cols, 2 rows) */}
           <Link href="/planner" className="col-span-7 row-span-4 rounded-3xl">
@@ -109,6 +110,6 @@ export default function Home() {
           /> */}
         </section>
       </main>
-    </div>
+    // </div>
   );
 }
