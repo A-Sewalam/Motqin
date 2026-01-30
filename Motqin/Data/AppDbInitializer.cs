@@ -8,9 +8,9 @@ namespace Motqin.Data
 {
     public class AppDbInitializer
     {
-        public static void Seed(IApplicationBuilder applicationBuilder)
+        public static void Seed(IServiceProvider serviceProvider)
         {
-            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            using (var serviceScope = serviceProvider.CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
 
@@ -74,7 +74,9 @@ namespace Motqin.Data
                             Email = "ahmed@student.com",
                             PasswordHash = "HASHED_PASSWORD",
                             Role = "Student",
-                            GradeLevel = Enums.GradeLevel.Third
+                            GradeLevel = Enums.GradeLevel.Third,
+                            Country = "Egypt",
+                            EducationalStage = Enums.EducationalStage.Secondary
                         },
                         new User
                         {
@@ -82,7 +84,9 @@ namespace Motqin.Data
                             Email = "sara@student.com",
                             PasswordHash = "HASHED_PASSWORD",
                             Role = "Student",
-                            GradeLevel = Enums.GradeLevel.Third
+                            GradeLevel = Enums.GradeLevel.Third,
+                            Country = "Egypt",
+                            EducationalStage = Enums.EducationalStage.Secondary
                         }
                     );
                     context.SaveChanges();

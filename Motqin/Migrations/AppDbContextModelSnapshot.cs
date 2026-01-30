@@ -384,13 +384,13 @@ namespace Motqin.Migrations
                     b.HasOne("Motqin.Models.Competition", "Competition")
                         .WithMany("CompetitionEntries")
                         .HasForeignKey("CompetitionID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Motqin.Models.User", "User")
                         .WithMany("CompetitionEntries")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Competition");
@@ -403,7 +403,7 @@ namespace Motqin.Migrations
                     b.HasOne("Motqin.Models.User", "User")
                         .WithMany("DistractionControls")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -414,7 +414,7 @@ namespace Motqin.Migrations
                     b.HasOne("Motqin.Models.Subject", "Subject")
                         .WithMany("Lessons")
                         .HasForeignKey("SubjectID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Subject");
@@ -425,13 +425,13 @@ namespace Motqin.Migrations
                     b.HasOne("Question", "Question")
                         .WithMany("QuestionDetails")
                         .HasForeignKey("QuestionID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Motqin.Models.StudySession", "StudySession")
                         .WithMany("QuestionDetails")
                         .HasForeignKey("SessionID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Question");
@@ -444,13 +444,13 @@ namespace Motqin.Migrations
                     b.HasOne("Motqin.Models.Lesson", "Lesson")
                         .WithMany("StudyPlans")
                         .HasForeignKey("LessonID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Motqin.Models.User", "User")
                         .WithMany("StudyPlans")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Lesson");
@@ -463,13 +463,13 @@ namespace Motqin.Migrations
                     b.HasOne("Motqin.Models.Lesson", "Lesson")
                         .WithMany("StudySessions")
                         .HasForeignKey("LessonID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Motqin.Models.User", "User")
                         .WithMany("StudySessions")
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Lesson");
@@ -482,7 +482,7 @@ namespace Motqin.Migrations
                     b.HasOne("Motqin.Models.Lesson", "Lesson")
                         .WithMany("Questions")
                         .HasForeignKey("LessonID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Lesson");

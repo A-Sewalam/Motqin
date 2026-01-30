@@ -54,7 +54,7 @@ namespace Motqin.Data
                 .HasOne(l => l.Subject)
                 .WithMany(s => s.Lessons)
                 .HasForeignKey(l => l.SubjectID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // Lesson → Question (1 : Many)
@@ -63,7 +63,7 @@ namespace Motqin.Data
                 .HasOne(q => q.Lesson)
                 .WithMany(l => l.Questions)
                 .HasForeignKey(q => q.LessonID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             
             // -------------------------------------------------
             // User → StudySession (1 : Many)
@@ -72,7 +72,7 @@ namespace Motqin.Data
                 .HasOne(ss => ss.User)
                 .WithMany(u => u.StudySessions)
                 .HasForeignKey(ss => ss.UserID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // Lesson → StudySession (1 : Many)
@@ -81,7 +81,7 @@ namespace Motqin.Data
                 .HasOne(ss => ss.Lesson)
                 .WithMany(l => l.StudySessions)
                 .HasForeignKey(ss => ss.LessonID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // StudySession → QuestionDetails (1 : Many)
@@ -90,7 +90,7 @@ namespace Motqin.Data
                 .HasOne(qd => qd.StudySession)
                 .WithMany(ss => ss.QuestionDetails)
                 .HasForeignKey(qd => qd.SessionID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // Question → QuestionDetails (1 : Many)
@@ -99,7 +99,7 @@ namespace Motqin.Data
                 .HasOne(qd => qd.Question)
                 .WithMany(q => q.QuestionDetails)
                 .HasForeignKey(qd => qd.QuestionID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // User → StudyPlan (1 : Many)
@@ -108,7 +108,7 @@ namespace Motqin.Data
                 .HasOne(sp => sp.User)
                 .WithMany(u => u.StudyPlans)
                 .HasForeignKey(sp => sp.UserID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // Lesson → StudyPlan (1 : Many)
@@ -117,7 +117,7 @@ namespace Motqin.Data
                 .HasOne(sp => sp.Lesson)
                 .WithMany(l => l.StudyPlans)
                 .HasForeignKey(sp => sp.LessonID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // User → DistractionControl (1 : Many)
@@ -126,7 +126,7 @@ namespace Motqin.Data
                 .HasOne(dc => dc.User)
                 .WithMany(u => u.DistractionControls)
                 .HasForeignKey(dc => dc.UserID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // Competition → CompetitionEntry (1 : Many)
@@ -135,7 +135,7 @@ namespace Motqin.Data
                 .HasOne(ce => ce.Competition)
                 .WithMany(c => c.CompetitionEntries)
                 .HasForeignKey(ce => ce.CompetitionID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
             // User → CompetitionEntry (1 : Many)
@@ -144,7 +144,7 @@ namespace Motqin.Data
                 .HasOne(ce => ce.User)
                 .WithMany(u => u.CompetitionEntries)
                 .HasForeignKey(ce => ce.UserID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             // -------------------------------------------------
             // Subject → GradeLevel & EducationalStage (Enums)
             // -------------------------------------------------

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Motqin.Data;
 
 namespace Motqin
@@ -30,7 +31,7 @@ namespace Motqin
             var app = builder.Build();
 
             //Seeding after build
-            AppDbInitializer.Seed(app);
+            AppDbInitializer.Seed(app.Services);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
