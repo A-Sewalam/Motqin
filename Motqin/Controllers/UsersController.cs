@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Motqin.Controllers
 {
+    using Microsoft.AspNetCore.Http.HttpResults;
     using Microsoft.AspNetCore.Mvc;
     using Motqin.Dtos.User;
     using Motqin.Models;
@@ -30,7 +31,9 @@ namespace Motqin.Controllers
                 Name = user.Name,
                 Email = user.Email,
                 Role = user.Role,
-                GradeLevel = user.GradeLevel
+                GradeLevel = user.GradeLevel,
+                Country = user.Country,
+                EducationalStage = user.EducationalStage
             });
 
             return Ok(readDtos);
@@ -48,7 +51,9 @@ namespace Motqin.Controllers
                 Name = user.Name,
                 Email = user.Email,
                 Role = user.Role,
-                GradeLevel = user.GradeLevel
+                GradeLevel = user.GradeLevel,
+                Country = user.Country,
+                EducationalStage = user.EducationalStage
             };
 
             return Ok(readDto);
@@ -63,7 +68,9 @@ namespace Motqin.Controllers
                 Email = createDto.Email,
                 Role = createDto.Role,
                 GradeLevel = createDto.GradeLevel,
-                PasswordHash = PasswordHasher.HashPassword(createDto.Password)
+                PasswordHash = PasswordHasher.HashPassword(createDto.Password),
+                Country = createDto.Country,
+                EducationalStage = createDto.EducationalStage
             };
 
             await _usersService.CreateAsync(user);
@@ -74,7 +81,9 @@ namespace Motqin.Controllers
                 Name = user.Name,
                 Email = user.Email,
                 Role = user.Role,
-                GradeLevel = user.GradeLevel
+                GradeLevel = user.GradeLevel,
+                Country = createDto.Country,
+                EducationalStage = createDto.EducationalStage
             };
 
             return CreatedAtAction(nameof(GetById), new { id = readDto.UserId }, readDto);

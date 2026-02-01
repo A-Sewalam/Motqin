@@ -12,8 +12,13 @@ namespace Motqin.Controllers
     public class LessonsController : ControllerBase
     {
         private readonly ILessonsService _lessonsService;
+        private readonly ISubjectsService _subjectsService;
 
-        public LessonsController(ILessonsService lessonsService) => _lessonsService = lessonsService;
+        public LessonsController(ILessonsService lessonsService, ISubjectsService subjectsService)
+        {
+            _lessonsService = lessonsService;
+            _subjectsService = subjectsService;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LessonReadDto>>> GetBySubjectId(int subjectId)
@@ -46,6 +51,11 @@ namespace Motqin.Controllers
         [HttpPost]
         public async Task<ActionResult<LessonReadDto>> Create(LessonCreateDto dto)
         {
+            var subject = await _subjectsService.GetByIdAsync(dto.SubjectID);
+            if (subject == null)
+            {
+                return BadRequest("Invalid Subject ID.");
+            }
             var lesson = new Lesson
             {
                 SubjectID = dto.SubjectID,
@@ -67,6 +77,8 @@ namespace Motqin.Controllers
         {
             var existing = await _lessonsService.GetByIdAsync(id);
             if (existing == null) return NotFound();
+            var subjectExists = await _subjectsService.GetByIdAsync(dto.SubjectID);
+            if (subjectExists == null) return BadRequest("Invalid SubjectID");
 
             existing.Title = dto.Title;
             existing.SubjectID = dto.SubjectID;

@@ -4,8 +4,8 @@ namespace Motqin.Dtos.Lesson
 {
     public class LessonCreateDto
     {
-        [Required, MaxLength(200)]
-        public string Title { get; set; } = string.Empty;
+        [Required, MinLength(3), MaxLength(20)]
+        public string Title { get; set; } 
         [Required]
         public int SubjectID { get; set; }
     }
