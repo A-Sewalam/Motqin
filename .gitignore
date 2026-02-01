@@ -10,10 +10,12 @@ Motqin/appsettings.Development.json
 Motqin/appsettings.json
 
 # Build results
-Motqin/bin/*
-Motqin/obj/*
-Motqin/Debug/*
-Motqin/Release/*
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bin/
+obj/
 
 # Rider IDE
 .idea/

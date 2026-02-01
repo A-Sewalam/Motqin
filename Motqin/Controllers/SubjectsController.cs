@@ -16,7 +16,7 @@ namespace Motqin.Controllers
         {
             _subjectsService = service;
         }
-
+        // may cause Circular References because of navigation properity!!!!!!!!!!!!!!!!!!!!!!!!!
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Subject>>> GetAll()
         {
@@ -33,20 +33,20 @@ namespace Motqin.Controllers
         }
 
         // New endpoint: subjects for the user's grade level
-        //[HttpGet("get-subjects-by-user-grade-level")]
-        //public async Task<IActionResult> GetSubjectsByUserGradeLevel(int userId)
-        //{
-        //    var subjects = await _subjectsService.GetByUserGradeLevelAsync(userId);
-        //    if (subjects is null) return NotFound(); // user not found
-        //    return Ok(subjects.Select(s => new SubjectReadDto
-        //    {
-        //        SubjectID = s.SubjectID,
-        //        Name = s.Name,
-        //        Country = s.Country,
-        //        EducationalStage = s.EducationalStage,
-        //        GradeLevel = s.GradeLevel
-        //    }));
-        //}
+        [HttpGet("get-subjects-by-user-grade-level")]
+        public async Task<IActionResult> GetSubjectsByUserGradeLevel(int userId)
+        {
+            var subjects = await _subjectsService.GetByUserGradeLevelAsync(userId);
+            if (subjects is null) return NotFound(); // user not found
+            return Ok(subjects.Select(s => new SubjectReadDto
+            {
+                SubjectID = s.SubjectID,
+                Name = s.Name,
+                Country = s.Country,
+                EducationalStage = s.EducationalStage,
+                GradeLevel = s.GradeLevel
+            }));
+        }
 
         [HttpPost]
         public async Task<ActionResult<Subject>> Create([FromBody] SubjectDto dto)
