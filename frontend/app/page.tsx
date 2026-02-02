@@ -10,7 +10,6 @@ export default function Home() {
       <main className="flex min-h-screen w-full flex-col items-center  py-16 px-16  bg-[var(--surface)] sm:items-start font-sans">
         <div className="flex items-center justify-center h-[50vh] w-full pr-20">
           <Image
-            // src="/logo.svg"
             src="/متقن.svg"
             alt="Motqin Logo"
             width={700}
