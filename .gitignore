@@ -16,6 +16,10 @@ x64/
 x86/
 bin/
 obj/
+Motqin/bin/*
+Motqin/obj/*
+Motqin/Debug/*
+Motqin/Release/*
 
 # Rider IDE
 .idea/
