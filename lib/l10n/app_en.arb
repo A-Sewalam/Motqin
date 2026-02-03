@@ -1,0 +1,85 @@
+{
+"@@locale": "en",
+
+"login_to_your_account" : "Login to your account",
+"@login_to_your_account": {},
+
+"enter_your_email" : "Enter your email",
+"@enter_your_email": {},
+
+"enter_your_password" : "Enter your password",
+"@enter_your_password": {},
+
+"forget_password" : "Forget Password?",
+"@forget_password": {},
+
+"dont_have_an_account" : "Don't have an account?",
+"@dont_have_an_account": {},
+
+"sign_up" : "Sign Up",
+"@sign_up": {},
+
+"login_with_google" : "Login With Google",
+"@login_with_google": {},
+
+"login_with_facebook" : "Login With Facebook",
+"@login_with_facebook": {},
+
+
+"create_your_account" : "Create Your Account",
+"@create_your_account": {},
+
+"enter_your_name" : "Enter your name",
+"@enter_your_name": {},
+
+"confirm_your_password" : "Confirm your password",
+"@confirm_your_password": {},
+
+"already_have_an_account" : "Already have an account?",
+"@already_have_an_account": {},
+
+
+"sign_up_with_google" : "Sign Up With Google",
+"@sign_up_with_google": {},
+
+"sign_up_with_facebook" : "Sign Up With Facebook",
+"@sign_up_with_facebook": {},
+
+"login" : "Login",
+"@login": {},
+
+"or" : "Or",
+"@or": {},
+
+"user_name" : "User Name",
+"@user_name": {},
+
+
+
+"leaderboards_and_competitions" : "LeaderBoard And Competitions",
+"@leaderboards_and_competitions": {},
+
+"master_your_lessons" : "Master  Your Lessons",
+"@master_your_lessons": {},
+
+"understand_your_lessons" : "Understand  Your Lessons",
+"@understand_your_lessons": {},
+
+"block_distractions" : "Block_Distractions",
+"@block_distractions": {},
+
+
+"restrict_app_usage" : "Restrict App Usage",
+"@restrict_app_usage": {},
+
+"block_options" : "Block Options",
+"@block_options" : {},
+
+"admin_settings" : "Admin Settings",
+"@admin_settings": {},
+
+"study_timer" : "مؤقت الدراسة",
+"@study_timer": {},
+
+"end" : ""
+}
