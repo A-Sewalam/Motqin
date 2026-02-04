@@ -9,7 +9,7 @@ namespace Motqin.Models
         public int ControlID { get; set; }
 
         [Required]
-        public int UserID { get; set; }
+        public string UserID { get; set; }
 
         public string BlockedApps { get; set; } // JSON
 

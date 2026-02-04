@@ -11,7 +11,7 @@ namespace Motqin.Models
         public int SessionID { get; set; }
 
         [Required]
-        public int UserID { get; set; }
+        public string UserID { get; set; }
 
         [Required]
         public int LessonID { get; set; }

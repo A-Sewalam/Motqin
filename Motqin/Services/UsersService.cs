@@ -32,12 +32,12 @@ namespace Motqin.Services
 
         public async Task UpdateAsync(User user)
         {
-            var existingUser = await _context.Users.FindAsync(user.UserId);
+            var existingUser = await _context.Users.FindAsync(user.Id);
             if (existingUser == null) return;
 
-            existingUser.Name = user.Name;
+            existingUser.UserName = user.UserName;
             existingUser.Email = user.Email;
-            existingUser.Role = user.Role;
+        //    existingUser.Role = user.Role;
             existingUser.GradeLevel = user.GradeLevel;
 
             await _context.SaveChangesAsync();

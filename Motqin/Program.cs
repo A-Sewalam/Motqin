@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Motqin.Data;
+using Motqin.Models;
 
 namespace Motqin
 {
@@ -27,6 +29,11 @@ namespace Motqin
             builder.Services.AddScoped<Services.SubjectsService>();
             builder.Services.AddScoped<Services.QuestionsService>();
             builder.Services.AddScoped<Services.ISubjectsService, Services.SubjectsService>();
+
+            //Add Identity
+            builder.Services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
             var app = builder.Build();
 

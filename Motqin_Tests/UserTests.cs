@@ -54,14 +54,14 @@ public class UserTests : IntegrationTestBase
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
         // Act
-        var response = await Client.GetAsync($"/api/users/{user.UserId}");
+        var response = await Client.GetAsync($"/api/users/{user.Id}");
 
         // Assert
         response.EnsureSuccessStatusCode();
         var returnedUser = await response.Content.ReadFromJsonAsync<UserReadDto>();
 
         Assert.NotNull(returnedUser);
-        Assert.Equal(user.UserId, returnedUser.UserId);
+        Assert.Equal(user.Id, returnedUser.UserId);
         Assert.Equal(user.Name, returnedUser.Name);
     }
 
@@ -158,13 +158,13 @@ public class UserTests : IntegrationTestBase
         var updateDto = new { Name = "Amged", Role = "Admin", GradeLevel = 3 };
 
         // Act
-        var response = await Client.PutAsJsonAsync($"/api/users/{originalUser.UserId}", updateDto);
+        var response = await Client.PutAsJsonAsync($"/api/users/{originalUser.Id}", updateDto);
 
         // Assert
         Assert.Equal(System.Net.HttpStatusCode.NoContent, response.StatusCode);
 
         // Verify database was actually updated
-        var updatedDbUser = await DbContext.Users.FindAsync(originalUser.UserId);
+        var updatedDbUser = await DbContext.Users.FindAsync(originalUser.Id);
         Assert.NotNull(updatedDbUser);
         Assert.Equal("Amged", updatedDbUser.Name);
         Assert.Equal("Admin", updatedDbUser.Role);
@@ -193,13 +193,13 @@ public class UserTests : IntegrationTestBase
         DbContext.Entry(userToDelete).State = EntityState.Detached;
 
         // 2. Act: Call the Delete endpoint
-        var response = await Client.DeleteAsync($"/api/users/{userToDelete.UserId}");
+        var response = await Client.DeleteAsync($"/api/users/{userToDelete.Id}");
 
         // 3. Assert
         Assert.Equal(System.Net.HttpStatusCode.NoContent, response.StatusCode);
 
         // Verify the database is empty for this ID
-        var deletedUser = await DbContext.Users.FindAsync(userToDelete.UserId);
+        var deletedUser = await DbContext.Users.FindAsync(userToDelete.Id);
         Assert.Null(deletedUser);
     }
 

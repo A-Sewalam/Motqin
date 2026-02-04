@@ -27,10 +27,10 @@ namespace Motqin.Controllers
 
             var readDtos = users.Select(user => new UserReadDto
             {
-                UserId = user.UserId,
-                Name = user.Name,
+                UserId = user.Id,
+                Name = user.UserName,
                 Email = user.Email,
-                Role = user.Role,
+            //    Role = user.Role,
                 GradeLevel = user.GradeLevel,
                 Country = user.Country,
                 EducationalStage = user.EducationalStage
@@ -47,10 +47,10 @@ namespace Motqin.Controllers
 
             var readDto = new UserReadDto
             {
-                UserId = user.UserId,
-                Name = user.Name,
+                UserId = user.Id,
+                Name = user.UserName,
                 Email = user.Email,
-                Role = user.Role,
+            //    Role = user.Role,
                 GradeLevel = user.GradeLevel,
                 Country = user.Country,
                 EducationalStage = user.EducationalStage
@@ -64,9 +64,9 @@ namespace Motqin.Controllers
         {
             var user = new User
             {
-                Name = createDto.Name,
+                UserName = createDto.Name,
                 Email = createDto.Email,
-                Role = createDto.Role,
+            //    Role = createDto.Role,
                 GradeLevel = createDto.GradeLevel,
                 PasswordHash = PasswordHasher.HashPassword(createDto.Password),
                 Country = createDto.Country,
@@ -77,10 +77,10 @@ namespace Motqin.Controllers
 
             var readDto = new UserReadDto
             {
-                UserId = user.UserId,
-                Name = user.Name,
+                UserId = user.Id,
+                Name = user.UserName,
                 Email = user.Email,
-                Role = user.Role,
+            //    Role = user.Role,
                 GradeLevel = user.GradeLevel,
                 Country = createDto.Country,
                 EducationalStage = createDto.EducationalStage
@@ -95,8 +95,8 @@ namespace Motqin.Controllers
             var userToUpdate = await _usersService.GetByIdAsync(id);
             if (userToUpdate == null) return NotFound();
 
-            userToUpdate.Name = updateDto.Name;
-            userToUpdate.Role = updateDto.Role;
+            userToUpdate.UserName = updateDto.Name;
+        //    userToUpdate.Role = updateDto.Role;
             userToUpdate.GradeLevel = updateDto.GradeLevel;
 
             await _usersService.UpdateAsync(userToUpdate);

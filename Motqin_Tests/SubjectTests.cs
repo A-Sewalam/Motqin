@@ -70,7 +70,7 @@ public class SubjectTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // 3. Act
-        var response = await Client.GetAsync($"/api/subjects/get-subjects-by-user-grade-level?userId={user.UserId}");
+        var response = await Client.GetAsync($"/api/subjects/get-subjects-by-user-grade-level?userId={user.Id}");
 
         // 4. Assert
         response.EnsureSuccessStatusCode();

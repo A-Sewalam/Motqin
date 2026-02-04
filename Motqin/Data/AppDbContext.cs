@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Motqin.Models;
 using System.Numerics;
 
 namespace Motqin.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -20,8 +21,6 @@ namespace Motqin.Data
 
         public DbSet<Question> Questions { get; set; }
         public DbSet<QuestionDetails> QuestionDetails { get; set; }
-
-        public DbSet<User> Users { get; set; }
         public DbSet<StudySession> StudySessions { get; set; }
         public DbSet<StudyPlan> StudyPlans { get; set; }
 

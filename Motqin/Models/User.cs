@@ -1,24 +1,12 @@
-﻿using Motqin.Enums;
+﻿using Microsoft.AspNetCore.Identity;
+using Motqin.Enums;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Motqin.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        [Key]
-        public int UserId { get; set; }
-
-        [Required, MaxLength(100)]
-        public string Name { get; set; } = string.Empty;
-
-        [Required, EmailAddress]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        public string PasswordHash { get; set; } = string.Empty;
-
-        public string? Role { get; set; }
 
         [StringLength(100)]
         public  string Country { get; set; }

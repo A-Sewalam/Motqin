@@ -9,7 +9,7 @@ namespace Motqin.Services
     public interface ISubjectsService
     {
         Task<List<Subject>> GetAllAsync();
-        Task<List<Subject>?> GetByUserGradeLevelAsync(int userId);
+  //    Task<List<Subject>?> GetByUserGradeLevelAsync(int userId);
         Task<Subject?> GetByIdAsync(int id);
         Task<Subject> CreateAsync(SubjectDto subjectDto);
         Task<bool> UpdateAsync(Subject subject);
@@ -31,24 +31,24 @@ namespace Motqin.Services
 
         // New: get subjects matching the user's grade level.
         // Returns null if user not found; returns empty list if user has no grade or no matching subjects.
-        public async Task<List<Subject>?> GetByUserGradeLevelAsync(int userId)
-        {
-            var user = await _context.Users
-                                     .AsNoTracking()
-                                     .FirstOrDefaultAsync(u => u.UserId == userId);
+        //public async Task<List<Subject>?> GetByUserGradeLevelAsync(int userId)
+        //{
+        //    var user = await _context.Users
+        //                             .AsNoTracking()
+        //                             .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (user is null)
-                return null;
+        //    if (user is null)
+        //        return null;
 
-            var country = user.Country;
-            var gradeLevel = user.GradeLevel;
-            var educationalStage = user.EducationalStage;
+        //    var country = user.Country;
+        //    var gradeLevel = user.GradeLevel;
+        //    var educationalStage = user.EducationalStage;
 
 
-            var subjects = await GetAllAsync(country, gradeLevel, educationalStage);
+        //    var subjects = await GetAllAsync(country, gradeLevel, educationalStage);
 
-            return subjects;
-        }
+        //    return subjects;
+        //}
 
         public async Task<Subject?> GetByIdAsync(int id)
         {
