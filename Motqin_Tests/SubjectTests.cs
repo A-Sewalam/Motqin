@@ -60,7 +60,7 @@ public class SubjectTests : IntegrationTestBase
         // 2. Arrange: Seed a User with a specific GradeLevel
         var user = new User
         {
-            Name = "Hadi",
+            UserName = "Hadi",
             Email = "hadi@test.com",
             GradeLevel = GradeLevel.Second, // Matches "Math Grade 3"
             Country = "Egypt",

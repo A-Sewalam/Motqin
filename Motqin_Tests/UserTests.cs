@@ -43,10 +43,9 @@ public class UserTests : IntegrationTestBase
         // Arrange
         var user = new User
         {
-            Name = "Dodo Hesham",
+            UserName = "Dodo Hesham",
             Email = "dodo@example.com",
             PasswordHash = "hashedpassword",
-            Role = "Student",
             Country = "Egypt",
             EducationalStage = EducationalStage.Secondary,
             GradeLevel = GradeLevel.Second
@@ -62,7 +61,7 @@ public class UserTests : IntegrationTestBase
 
         Assert.NotNull(returnedUser);
         Assert.Equal(user.Id, returnedUser.UserId);
-        Assert.Equal(user.Name, returnedUser.Name);
+        Assert.Equal(user.UserName, returnedUser.Name);
     }
 
     [Fact]
@@ -101,7 +100,7 @@ public class UserTests : IntegrationTestBase
 
         var returnedDto = await response.Content.ReadFromJsonAsync<UserReadDto>();
         Assert.NotNull(returnedDto);
-        Assert.True(returnedDto.UserId > 0);
+        Assert.NotNull(returnedDto.UserId);
         Assert.Equal(newUser.Name, returnedDto.Name);
 
         // 3. Verify the Location Header (points to GetById)
@@ -110,7 +109,7 @@ public class UserTests : IntegrationTestBase
         // 4. Verify Database Persistence
         var dbUser = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == newUser.Email);
         Assert.NotNull(dbUser);
-        Assert.Equal(newUser.Name, dbUser.Name);
+        Assert.Equal(newUser.Name, dbUser.UserName);
 
         // Crucial: Check that the password was actually hashed and not saved as plain text!
         Assert.NotEqual(newUser.Password, dbUser.PasswordHash);
@@ -142,9 +141,8 @@ public class UserTests : IntegrationTestBase
         // Arrange
         var originalUser = new User
         {
-            Name = "Amgad",
+            UserName = "Amgad",
             Email = "amgad@test.com",
-            Role = "Student",
             GradeLevel = GradeLevel.Third,
             Country = "Egypt",
             EducationalStage = EducationalStage.Secondary
@@ -166,8 +164,7 @@ public class UserTests : IntegrationTestBase
         // Verify database was actually updated
         var updatedDbUser = await DbContext.Users.FindAsync(originalUser.Id);
         Assert.NotNull(updatedDbUser);
-        Assert.Equal("Amged", updatedDbUser.Name);
-        Assert.Equal("Admin", updatedDbUser.Role);
+        Assert.Equal("Amged", updatedDbUser.UserName);
         Assert.Equal(GradeLevel.Third, updatedDbUser.GradeLevel);
 
         // Verify fields NOT in DTO remained the same
@@ -180,10 +177,9 @@ public class UserTests : IntegrationTestBase
         // 1. Arrange: Seed a user
         var userToDelete = new User
         {
-            Name = "Delete Me",
+            UserName = "Delete Me",
             Email = "delete@test.com",
             PasswordHash = "hashed",
-            Role = "Student",
             Country = "Egypt"
         };
         DbContext.Users.Add(userToDelete);
