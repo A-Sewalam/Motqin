@@ -76,6 +76,7 @@ namespace Motqin
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

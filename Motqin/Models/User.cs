@@ -10,7 +10,6 @@ namespace Motqin.Models
 
         [StringLength(100)]
         public  string Country { get; set; }
-
         public EducationalStage EducationalStage { get; set; }
         public GradeLevel GradeLevel { get; set; }
 
