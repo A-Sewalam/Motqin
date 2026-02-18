@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Motqin.Models;
+using SchoolApp.API.Data.Models;
 using System.Numerics;
 
 namespace Motqin.Data
@@ -28,6 +29,8 @@ namespace Motqin.Data
 
         public DbSet<Competition> Competitions { get; set; }
         public DbSet<CompetitionEntry> CompetitionEntries { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
 
         // =========================
         // Fluent API Configuration

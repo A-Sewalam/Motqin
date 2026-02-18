@@ -33,6 +33,23 @@ namespace Motqin
             builder.Services.AddScoped<Services.QuestionsService>();
             builder.Services.AddScoped<Services.ISubjectsService, Services.SubjectsService>();
 
+            var TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JWT:Secret"])),
+
+                ValidateIssuer = true,
+                ValidIssuer = builder.Configuration["JWT:Issuer"],
+
+                ValidateAudience = true,
+                ValidAudience = builder.Configuration["JWT:Audience"],
+
+                  ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            builder.Services.AddSingleton(TokenValidationParameters); //bug fix : you must register it for the controller to use it
+
             //Add Identity
             builder.Services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
@@ -50,22 +67,12 @@ namespace Motqin
             {
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JWT:Secret"])),
-
-                    ValidateIssuer = true,
-                    ValidIssuer = builder.Configuration["JWT:Issuer"],
-
-                    ValidateAudience = true,
-                    ValidAudience = builder.Configuration["JWT:Audience"]
-                };
+                options.TokenValidationParameters = TokenValidationParameters;
             });
             var app = builder.Build();
 
             //Seeding after build
-            //AppDbInitializer.Seed(app.Services);
+            AppDbInitializer.SeedRolesToDb(app).Wait();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

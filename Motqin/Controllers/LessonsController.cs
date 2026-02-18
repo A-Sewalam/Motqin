@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Motqin.Data.Helpers;
 using Motqin.Dtos.Lesson;
 using Motqin.Dtos.User;
 using Motqin.Models;
@@ -19,6 +21,7 @@ namespace Motqin.Controllers
             _lessonsService = lessonsService;
             _subjectsService = subjectsService;
         }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LessonReadDto>>> GetBySubjectId(int subjectId)

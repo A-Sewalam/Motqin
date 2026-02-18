@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Motqin.Data.Helpers;
 using Motqin.Dtos.Subject;
 using Motqin.Enums;
 using Motqin.Models;
@@ -8,6 +10,8 @@ namespace Motqin.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = UserRoles.Student)]
+
     public class SubjectsController : ControllerBase
     {
         private readonly SubjectsService _subjectsService;
