@@ -131,9 +131,9 @@ namespace Motqin.Controllers
 
             try
             {
-                var tokenCheckResult = jwtTokenHandler.ValidateToken(tokenRequestVM.Token/*This is the token whose authenticity you must prove*/,
-                    _tokenValidationParameters/*A rulebook describing how the token must be validated.*/,
-                    out var validatedToken/*Receives the validated token object -- out used to returen one more thing from the function*/);
+                var tokenCheckResult = jwtTokenHandler.ValidateToken(tokenRequestVM.Token,
+                    _tokenValidationParameters,
+                    out var validatedToken);
 
                 // This function where the token gets validated.
 
@@ -180,9 +180,9 @@ namespace Motqin.Controllers
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
 
-            var jwtToken = new JwtSecurityTokenHandler().WriteToken(token); //  here when we receive the final format of the token.
+            var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-            if (rToken != null) //here if a fresh token is valid, we just need to make a new token.
+            if (rToken != null)
             {
                 var rTokenResponse = new AuthResultDto()
                 {
@@ -215,5 +215,6 @@ namespace Motqin.Controllers
 
             return response;
         }
+
     }
 }
