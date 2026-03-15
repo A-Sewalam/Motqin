@@ -35,7 +35,23 @@ namespace Motqin.Controllers
             if (item is null) return NotFound();
             return Ok(item);
         }
-
+        
+        [HttpGet]
+        public async Task<ActionResult<Question>> StartStudySession(int sessionId, DateTime startTime)
+        {
+            var session = await _subjectsService.GetStudySessionById(sessionId);
+            session.StartTime = startTime;
+            return Ok(session);
+        }
+        [HttpGet]
+        public async Task<ActionResult<Question>> EndStudySession(int sessionId, DateTime endTime, int score)
+        {
+            var session = await _subjectsService.GetStudySessionById(sessionId);
+            session.EndTime = endTime;
+            session.Score = score;
+            session.RepetitionNumber++;
+            return Ok(session);
+        }
         // New endpoint: subjects for the user's grade level
         //[HttpGet("get-subjects-by-user-grade-level")]
         //public async Task<IActionResult> GetSubjectsByUserGradeLevel(int userId)
