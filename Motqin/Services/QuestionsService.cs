@@ -14,6 +14,7 @@ namespace Motqin.Services
         Task<List<Question>> GetAllAsync();
         Task<List<Question>> GetByCategoryAndLessonIdAsync(string category, int lessonId);
         Task<Question?> GetByIdAsync(int id);
+        Task<QuestionDetails?> GetDetailsByIdAsync(int id);
         Task<List<Question>> GetByLessonIdAsync(int lessonId);
         Task<bool> UpdateAsync(Question question);
         Task<bool> UpdateFillInTheBlankQuestionAsync(FillInTheBlankQuestionDto dto);
@@ -38,7 +39,12 @@ namespace Motqin.Services
                                  .AsNoTracking()
                                  .FirstOrDefaultAsync(q => q.QuestionID == id);
         }
-
+        public async Task<QuestionDetails?> GetDetailsByIdAsync(int id)
+        {
+            return await _context.QuestionDetails
+                                 .AsNoTracking()
+                                 .FirstOrDefaultAsync(q => q.QuestionID == id);
+        }
         public async Task<List<Question>> GetByLessonIdAsync(int lessonId)
         {
             return await _context.Questions
