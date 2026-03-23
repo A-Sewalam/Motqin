@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Motqin.Models.Session;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,7 +23,7 @@ namespace Motqin.Models
         public virtual Subject Subject { get; set; }
 
         public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
-        public virtual ICollection<StudySession> StudySessions { get; set; } = new List<StudySession>();
+        public virtual ICollection<SpacedRepetitionSession> StudySessions { get; set; } = new List<SpacedRepetitionSession>();
         public virtual ICollection<StudyPlan> StudyPlans { get; set; } = new List<StudyPlan>();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Motqin.Models;
+using Motqin.Models.Session;
 using SchoolApp.API.Data.Models;
 using System.Numerics;
 
@@ -22,7 +23,7 @@ namespace Motqin.Data
 
         public DbSet<Question> Questions { get; set; }
         public DbSet<QuestionDetails> QuestionDetails { get; set; }
-        public DbSet<StudySession> StudySessions { get; set; }
+        public DbSet<SpacedRepetitionSession> StudySessions { get; set; }
         public DbSet<StudyPlan> StudyPlans { get; set; }
 
         public DbSet<DistractionControl> DistractionControls { get; set; }
@@ -68,25 +69,25 @@ namespace Motqin.Data
                 .OnDelete(DeleteBehavior.NoAction);
             
             // -------------------------------------------------
-            // User → StudySession (1 : Many)
+            // User → SpacedRepetitionSession (1 : Many)
             // -------------------------------------------------
-            modelBuilder.Entity<StudySession>()
+            modelBuilder.Entity<SpacedRepetitionSession>()
                 .HasOne(ss => ss.User)
                 .WithMany(u => u.StudySessions)
                 .HasForeignKey(ss => ss.UserID)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
-            // Lesson → StudySession (1 : Many)
+            // Lesson → SpacedRepetitionSession (1 : Many)
             // -------------------------------------------------
-            modelBuilder.Entity<StudySession>()
+            modelBuilder.Entity<SpacedRepetitionSession>()
                 .HasOne(ss => ss.Lesson)
                 .WithMany(l => l.StudySessions)
                 .HasForeignKey(ss => ss.LessonID)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
-            // StudySession → QuestionDetails (1 : Many)
+            // SpacedRepetitionSession → QuestionDetails (1 : Many)
             // -------------------------------------------------
             modelBuilder.Entity<QuestionDetails>()
                 .HasOne(qd => qd.StudySession)

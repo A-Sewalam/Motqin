@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -279,5 +280,61 @@ namespace Motqin.Controllers
             return response;
         }
 
+        
+
+[HttpPost("google-regester-or-login")]
+    public async Task<IActionResult> GoogleRegesterOrLogin([FromBody] GoogleRegesterOrLoginDto model)
+    {
+        if (string.IsNullOrWhiteSpace(model.IdToken))
+            return BadRequest("Invalid request");
+
+        GoogleJsonWebSignature.Payload payload;
+
+        try
+        {
+            payload = await GoogleJsonWebSignature.ValidateAsync(model.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new List<string>
+                    {
+                    _configuration["GoogleAuthSettings:ClientId"]
+                    }
+                });
+        }
+        catch
+        {
+            return BadRequest("Invalid Google token");
+        }
+
+        // Check if user already exists
+        var user = await _userManager.FindByEmailAsync(payload.Email);
+
+        if (user == null)
+        {
+            user = new User
+            {
+                Email = payload.Email,
+                UserName = payload.Email,
+                EmailConfirmed = true, // Google already verified email
+                SecurityStamp = Guid.NewGuid().ToString(),
+                Country = "Egypt",
+                EducationalStage = EducationalStage.Secondary,
+                GradeLevel = GradeLevel.Third
+            };
+
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest("User creation failed");
+
+            await _userManager.AddToRoleAsync(user, UserRoles.Student);
+        }
+
+        // Generate your JWT
+        var token = await GenerateJWTTokenAsync(user, null);
+
+        return Ok(token);
     }
+
+
+}
 }

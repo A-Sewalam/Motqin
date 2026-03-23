@@ -148,7 +148,7 @@ namespace Motqin.Data
             //        // =========================
             //        if (!context.StudySessions.Any())
             //        {
-            //            context.StudySessions.Add(new StudySession
+            //            context.StudySessions.Add(new SpacedRepetitionSession
             //            {
             //                UserID = user.Id,
             //                LessonID = lesson1.LessonID,

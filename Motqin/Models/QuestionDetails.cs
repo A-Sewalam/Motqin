@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Motqin.Models.Session;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,7 +24,7 @@ namespace Motqin.Models
 
         // Navigation Properties
         [ForeignKey("SessionID")]
-        public virtual StudySession StudySession { get; set; }
+        public virtual SpacedRepetitionSession StudySession { get; set; }
 
         [ForeignKey("QuestionID")]
         public virtual Question Question { get; set; }

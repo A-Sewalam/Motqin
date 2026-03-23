@@ -343,7 +343,7 @@ namespace Motqin.Migrations
                     b.ToTable("StudyPlans");
                 });
 
-            modelBuilder.Entity("Motqin.Models.StudySession", b =>
+            modelBuilder.Entity("Motqin.Models.SpacedRepetitionSession", b =>
                 {
                     b.Property<int>("SessionID")
                         .ValueGeneratedOnAdd()
@@ -700,7 +700,7 @@ namespace Motqin.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Motqin.Models.StudySession", "StudySession")
+                    b.HasOne("Motqin.Models.SpacedRepetitionSession", "SpacedRepetitionSession")
                         .WithMany("QuestionDetails")
                         .HasForeignKey("SessionID")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -708,7 +708,7 @@ namespace Motqin.Migrations
 
                     b.Navigation("Question");
 
-                    b.Navigation("StudySession");
+                    b.Navigation("SpacedRepetitionSession");
                 });
 
             modelBuilder.Entity("Motqin.Models.StudyPlan", b =>
@@ -730,7 +730,7 @@ namespace Motqin.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Motqin.Models.StudySession", b =>
+            modelBuilder.Entity("Motqin.Models.SpacedRepetitionSession", b =>
                 {
                     b.HasOne("Motqin.Models.Lesson", "Lesson")
                         .WithMany("StudySessions")
@@ -785,7 +785,7 @@ namespace Motqin.Migrations
                     b.Navigation("StudySessions");
                 });
 
-            modelBuilder.Entity("Motqin.Models.StudySession", b =>
+            modelBuilder.Entity("Motqin.Models.SpacedRepetitionSession", b =>
                 {
                     b.Navigation("QuestionDetails");
                 });

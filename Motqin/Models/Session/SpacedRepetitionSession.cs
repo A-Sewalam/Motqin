@@ -1,18 +1,17 @@
 ﻿using Motqin.Enums;
+using Motqin.Models.Session;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Motqin.Models
+namespace Motqin.Models.Session
 {
-    public class StudySession
+    public class SpacedRepetitionSession : Session
     {
-        [Key]
-        public int SessionID { get; set; }
 
         [Required]
-        public string UserID { get; set; }
+        public int SubjectID { get; set; }
 
         [Required]
         public int LessonID { get; set; }
@@ -23,13 +22,13 @@ namespace Motqin.Models
         public int RepetitionNumber { get; set; }
 
         public StudySessionStatuses StudySessionStatuses { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+
         public int Score { get; set; }
 
         // Navigation Properties
-        [ForeignKey("UserID")]
-        public virtual User User { get; set; }
+
+        [ForeignKey("SubjectID")]
+        public virtual Lesson Subject { get; set; }
 
         [ForeignKey("LessonID")]
         public virtual Lesson Lesson { get; set; }
