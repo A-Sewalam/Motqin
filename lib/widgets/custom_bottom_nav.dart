@@ -4,21 +4,31 @@ import 'package:provider/provider.dart';
 import '../providers/app_language_provider.dart';
 
 class CustomBottomNav extends StatelessWidget {
-  const CustomBottomNav({super.key});
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  const CustomBottomNav({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final langProvider = context.watch<AppLanguageProvider>();
     final isArabic = langProvider.appLanguage == 'ar';
-    
+
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.tabsBgColor,
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(35), topRight: Radius.circular(35))
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(35),
+          topRight: Radius.circular(35),
+        ),
       ),
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -28,7 +38,6 @@ class CustomBottomNav extends StatelessWidget {
                 activeIcon: Icons.home,
                 label: isArabic ? 'الرئيسية' : 'Home',
                 index: 0,
-                isActive: ,
                 color: AppColors.homeTabColor,
               ),
               _buildNavItem(
@@ -37,7 +46,6 @@ class CustomBottomNav extends StatelessWidget {
                 activeIcon: Icons.emoji_events,
                 label: isArabic ? 'المسابقات' : 'Compete',
                 index: 1,
-                isActive: ,
                 color: AppColors.competeTabColor,
               ),
               _buildNavItem(
@@ -46,7 +54,6 @@ class CustomBottomNav extends StatelessWidget {
                 activeIcon: Icons.star,
                 label: isArabic ? 'اتقن' : 'Master',
                 index: 2,
-                isActive: ,
                 color: AppColors.masterTabColor,
               ),
               _buildNavItem(
@@ -55,8 +62,7 @@ class CustomBottomNav extends StatelessWidget {
                 activeIcon: Icons.school,
                 label: isArabic ? 'افهم' : 'Learn',
                 index: 3,
-                isActive: ,
-                color: AppColors.learnTabColor
+                color: AppColors.learnTabColor,
               ),
               _buildNavItem(
                 context,
@@ -64,7 +70,6 @@ class CustomBottomNav extends StatelessWidget {
                 activeIcon: Icons.block,
                 label: isArabic ? 'التركيز' : 'Focus',
                 index: 4,
-                isActive: ,
                 color: AppColors.focusTabColor,
               ),
             ],
@@ -80,14 +85,14 @@ class CustomBottomNav extends StatelessWidget {
     required IconData activeIcon,
     required String label,
     required int index,
-    required bool isActive,
     required Color color,
   }) {
+    final bool isActive = currentIndex == index;
+
     return GestureDetector(
-      onTap: () {
-      },
+      onTap: () => onTap(index),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         padding: EdgeInsets.symmetric(
           horizontal: isActive ? 16 : 12,
           vertical: 8,
@@ -104,7 +109,7 @@ class CustomBottomNav extends StatelessWidget {
               color: isActive ? color : Colors.grey,
               size: isActive ? 30 : 24,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
