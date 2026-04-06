@@ -44,7 +44,21 @@ namespace Motqin.Controllers
             var items = await _questionsService.GetByCategoryAndLessonIdAsync(category, lessonId);
             return Ok(items);
         }
-
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Question>> StartQuestion(int id,DateTime startTime)
+        {
+            var question = await _questionsService.GetDetailsByIdAsync(id);
+            question.StartTime = startTime;
+            return Ok(question);
+        }
+        public async Task<ActionResult<Question>> EndQuestion(int id,DateTime endTime, string userAnswer, bool isCorrect)
+        {
+            var question = await _questionsService.GetDetailsByIdAsync(id);
+            question.EndTime = endTime;
+            question.UserAnswer = userAnswer;
+            question.IsCorrect = isCorrect;
+            return Ok(question);
+        }
         [HttpPost("mcq")]
         public async Task<ActionResult<Question>> CreateMcq([FromBody] MultipleChoiceQuestionDto dto)
         {
