@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Motqin.Data;
 
@@ -11,9 +12,11 @@ using Motqin.Data;
 namespace Motqin.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260406181327_SeprateStudySessiontypes")]
+    partial class SeprateStudySessiontypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -289,9 +292,6 @@ namespace Motqin.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserAddedQuestionID")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserAnswer")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -301,8 +301,6 @@ namespace Motqin.Migrations
                     b.HasIndex("QuestionID");
 
                     b.HasIndex("SessionID");
-
-                    b.HasIndex("UserAddedQuestionID");
 
                     b.ToTable("QuestionDetails");
                 });
@@ -537,98 +535,6 @@ namespace Motqin.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Motqin.Models.UserAddedQuestion", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("DifficultyLevel")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LessonID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.Property<string>("QuestionCategory")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("QuestionText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("LessonID");
-
-                    b.ToTable("UserAddedQuestions");
-                });
-
-            modelBuilder.Entity("Motqin.Models.UserAddedQuestionDetails", b =>
-                {
-                    b.Property<int>("DetailID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DetailID"));
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("QuestionID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SessionID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAnswer")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("DetailID");
-
-                    b.HasIndex("QuestionID");
-
-                    b.HasIndex("SessionID");
-
-                    b.ToTable("UserAddedQuestionDetails");
-                });
-
-            modelBuilder.Entity("Motqin.Models.UserDeletedQuestion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserDeletedQuestions");
-                });
-
             modelBuilder.Entity("Question", b =>
                 {
                     b.Property<int>("QuestionID")
@@ -846,10 +752,6 @@ namespace Motqin.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Motqin.Models.UserAddedQuestion", null)
-                        .WithMany("QuestionDetails")
-                        .HasForeignKey("UserAddedQuestionID");
-
                     b.Navigation("Question");
 
                     b.Navigation("StudySession");
@@ -928,36 +830,6 @@ namespace Motqin.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Motqin.Models.UserAddedQuestion", b =>
-                {
-                    b.HasOne("Motqin.Models.Lesson", "Lesson")
-                        .WithMany()
-                        .HasForeignKey("LessonID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lesson");
-                });
-
-            modelBuilder.Entity("Motqin.Models.UserAddedQuestionDetails", b =>
-                {
-                    b.HasOne("Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Motqin.Models.Session.SpacedRepetitionSession", "StudySession")
-                        .WithMany()
-                        .HasForeignKey("SessionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-
-                    b.Navigation("StudySession");
-                });
-
             modelBuilder.Entity("Question", b =>
                 {
                     b.HasOne("Motqin.Models.Lesson", "Lesson")
@@ -1013,11 +885,6 @@ namespace Motqin.Migrations
                     b.Navigation("StudyPlans");
 
                     b.Navigation("StudySessions");
-                });
-
-            modelBuilder.Entity("Motqin.Models.UserAddedQuestion", b =>
-                {
-                    b.Navigation("QuestionDetails");
                 });
 
             modelBuilder.Entity("Question", b =>

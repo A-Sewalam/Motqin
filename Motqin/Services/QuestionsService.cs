@@ -19,6 +19,8 @@ namespace Motqin.Services
         Task<bool> UpdateAsync(Question question);
         Task<bool> UpdateFillInTheBlankQuestionAsync(FillInTheBlankQuestionDto dto);
         Task<bool> UpdateMultipleChoiceQuestionAsync(MultipleChoiceQuestionDto dto);
+        Task UserAddQuestion(UserAddedQuestion question);
+        Task UserDeleteQuestion(int questionId, string UserId);
     }
 
     public class QuestionsService : IQuestionsService
@@ -172,5 +174,27 @@ namespace Motqin.Services
 
         public async Task<bool> ExistsAsync(int id) =>
             await _context.Questions.AnyAsync(q => q.QuestionID == id);
+
+        public async Task UserAddQuestion(UserAddedQuestion question)
+        {
+            await _context.UserAddedQuestions.AddAsync(question);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UserDeleteQuestion(int questionId, string userId)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            var question = _context.UserAddedQuestions.FirstOrDefault(q => q.ID == questionId);
+            if (user != null && question != null)
+            {
+                var userDeletedQuestion = new UserDeletedQuestion
+                {
+                    UserId = userId,
+                    QuestionId = questionId
+                };
+                _context.Add(userDeletedQuestion);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

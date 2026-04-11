@@ -4,6 +4,7 @@ using Motqin.Data.Helpers;
 using Motqin.Dtos.Subject;
 using Motqin.Enums;
 using Motqin.Models;
+using Motqin.Models.Session;
 using Motqin.Services;
 
 namespace Motqin.Controllers
@@ -37,14 +38,14 @@ namespace Motqin.Controllers
         }
         
         [HttpGet]
-        public async Task<ActionResult<Question>> StartStudySession(int sessionId, DateTime startTime)
+        public async Task<ActionResult<SpacedRepetitionSession>> StartStudySession(int sessionId, DateTime startTime)
         {
             var session = await _subjectsService.GetStudySessionById(sessionId);
             session.StartTime = startTime;
             return Ok(session);
         }
         [HttpGet]
-        public async Task<ActionResult<Question>> EndStudySession(int sessionId, DateTime endTime, int score)
+        public async Task<ActionResult<SpacedRepetitionSession>> EndStudySession(int sessionId, DateTime endTime, int score)
         {
             var session = await _subjectsService.GetStudySessionById(sessionId);
             session.EndTime = endTime;
