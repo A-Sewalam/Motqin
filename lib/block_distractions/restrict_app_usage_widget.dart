@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'timed_block_service.dart';
 
 class _AppItem {
   final String emoji;
@@ -33,19 +34,39 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
     _AppItem(emoji: '✈️', nameAr: 'تيلغرام',  usage: 'استخدام: 22m'),
   ];
 
-  // Per-app overrides — user can still toggle individually
   late List<bool> _isAllowed;
+
+  // Singleton service — same instance as BlockOptionsWidget
+  final TimedBlockService _blockService = TimedBlockService();
 
   @override
   void initState() {
     super.initState();
     _isAllowed = List.filled(_apps.length, true);
+    _blockService.addListener(_onBlockStateChanged);
+  }
+
+  @override
+  void dispose() {
+    _blockService.removeListener(_onBlockStateChanged);
+    super.dispose();
+  }
+
+  void _onBlockStateChanged() {
+    if (!mounted) return;
+    setState(() {
+      // When block activates → all red. When it expires → restore to green.
+      if (_blockService.isActive) {
+        _isAllowed = List.filled(_apps.length, false);
+      } else {
+        _isAllowed = List.filled(_apps.length, true);
+      }
+    });
   }
 
   @override
   void didUpdateWidget(RestrictAppUsageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // When parent blocks/unblocks all, override all per-app values
     if (widget.allBlocked != oldWidget.allBlocked) {
       setState(() {
         _isAllowed = List.filled(_apps.length, !widget.allBlocked);
@@ -55,6 +76,8 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isBlocking = _blockService.isActive;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
@@ -92,7 +115,7 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
             child: ListView.builder(
               physics: const BouncingScrollPhysics(),
               itemCount: _apps.length,
-              itemBuilder: (_, i) => _appCard(i),
+              itemBuilder: (_, i) => _appCard(i, isBlocking),
             ),
           ),
         ],
@@ -100,9 +123,10 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
     );
   }
 
-  Widget _appCard(int i) {
+  Widget _appCard(int i, bool isBlocking) {
     final app = _apps[i];
-    final bool allowed = _isAllowed[i];
+    // During an active block, always show red regardless of _isAllowed
+    final bool allowed = isBlocking ? false : _isAllowed[i];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -134,12 +158,17 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => setState(() => _isAllowed[i] = !_isAllowed[i]),
+              // Disabled during active block — cannot toggle to green
+              onPressed: isBlocking
+                  ? null
+                  : () => setState(() => _isAllowed[i] = !_isAllowed[i]),
               style: ElevatedButton.styleFrom(
                 backgroundColor: allowed
                     ? const Color(0xFF22C55E)
                     : const Color(0xFFE91E63),
+                disabledBackgroundColor: const Color(0xFFE91E63),
                 foregroundColor: Colors.white,
+                disabledForegroundColor: Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(

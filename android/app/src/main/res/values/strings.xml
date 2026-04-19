@@ -1,0 +1,20 @@
+<!--
+    Add these strings to:
+    android/app/src/main/res/values/strings.xml
+
+    If the file doesn't exist, create it with this full content:
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <resources>
+        <string name="app_name">موتقن</string>
+        <string name="accessibility_service_label">منع المشتتات – موتقن</string>
+        <string name="accessibility_service_description">يراقب هذا الخدمة التطبيقات المفتوحة لحجب التطبيقات المشتتة خلال وقت الدراسة</string>
+        <string name="device_admin_description">يمنع حذف التطبيق أثناء جلسة الحجب لضمان الالتزام بوقت الدراسة</string>
+    </resources>
+-->
+<resources>
+    <string name="app_name">موتقن</string>
+    <string name="accessibility_service_label">منع المشتتات – موتقن</string>
+    <string name="accessibility_service_description">يراقب هذا الخدمة التطبيقات المفتوحة لحجب التطبيقات المشتتة خلال وقت الدراسة</string>
+    <string name="device_admin_description">يمنع حذف التطبيق أثناء جلسة الحجب لضمان الالتزام بوقت الدراسة</string>
+</resources>

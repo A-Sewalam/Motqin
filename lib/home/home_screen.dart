@@ -3,49 +3,14 @@ import 'package:motqin/utils/app_assets.dart';
 import 'package:motqin/utils/app_colors.dart';
 import 'package:motqin/l10n/app_localizations.dart';
 import 'package:motqin/utils/app_routes.dart';
-import 'package:motqin/widgets/custom_bottom_nav.dart'; 
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentNavIndex = 0;
-
-  void _onNavTap(int index) {
-    setState(() => _currentNavIndex = index);
-
-    switch (index) {
-      case 0:
-        // Already on home, do nothing
-        break;
-      case 1:
-        Navigator.of(context).pushNamed(AppRoutes.leaderboardCompetitionsRouteName);
-        break;
-      case 2:
-        Navigator.of(context).pushNamed(AppRoutes.masterYourLessonsRouteName);
-        break;
-      case 3:
-        Navigator.of(context).pushNamed(AppRoutes.understandYourLessonsRouteName);
-        break;
-      case 4:
-        Navigator.of(context).pushNamed(AppRoutes.blockDistractionsRouteName);
-        break;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.bgColor,
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentNavIndex,
-        onTap: _onNavTap,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -100,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // ── Compete / Leaderboards ─────────────────────────────
               _homeButton(
+                context: context,
                 text: AppLocalizations.of(context)!.leaderboards_and_competitions,
                 gradient: const LinearGradient(colors: [Color(0xFFFFF9B9), Color(0xFFFFF377)]),
                 textColor: AppColors.leaderboardtextColor,
@@ -111,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // ── Master Your Lessons ────────────────────────────────
               _homeButton(
+                context: context,
                 text: AppLocalizations.of(context)!.master_your_lessons,
                 gradient: const LinearGradient(colors: [Color(0xFFDAEAFF), Color(0xFFB2D3FF)]),
                 textColor: const Color(0xFF2563EB),
@@ -122,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // ── Understand Your Lessons ────────────────────────────
               _homeButton(
+                context: context,
                 text: AppLocalizations.of(context)!.understand_your_lessons,
                 gradient: const LinearGradient(colors: [Color(0xFFCDFFDE), Color(0xFF9CFFBE)]),
                 textColor: const Color(0xFF16A34A),
@@ -133,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // ── Block Distractions ─────────────────────────────────
               _homeButton(
+                context: context,
                 text: AppLocalizations.of(context)!.block_distractions,
                 gradient: const LinearGradient(colors: [Color(0xFFEEDDFF), Color(0xFFDDBFFF)]),
                 textColor: const Color(0xFF7C3AED),
@@ -149,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _homeButton({
+    required BuildContext context,
     required String text,
     required LinearGradient gradient,
     required Color textColor,
@@ -174,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Text perfectly centered across full button width
             Text(
               text,
               textAlign: TextAlign.center,
@@ -184,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: textColor,
               ),
             ),
-            // Icon pinned to the left
             Positioned(
               left: 0,
               child: Image.asset(icon, width: 42, height: 42),

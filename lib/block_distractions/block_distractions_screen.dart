@@ -4,6 +4,7 @@ import 'restrict_app_usage_widget.dart';
 import 'block_options_widget.dart';
 import 'admin_settings_widget.dart';
 import 'study_timer_widget.dart';
+import 'timed_block_service.dart';
 
 class BlockDistractionsScreen extends StatefulWidget {
   const BlockDistractionsScreen({super.key});
@@ -15,9 +16,23 @@ class BlockDistractionsScreen extends StatefulWidget {
 class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   bool _allBlocked = false;
 
-  void _onToggleBlock(bool blocked) {
+
+@override
+void initState() {
+    super.initState();
+    _checkAccessibilityPermission();
+  }
+
+    void _onToggleBlock(bool blocked) {
     setState(() => _allBlocked = blocked);
   }
+  Future<void> _checkAccessibilityPermission() async {
+  final service = TimedBlockService();
+
+  if (!await service.isPermissionGranted()) {
+    await service.requestPermission();
+  }
+}
 
   @override
   Widget build(BuildContext context) {

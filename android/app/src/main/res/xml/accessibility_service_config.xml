@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Place at: android/app/src/main/res/xml/accessibility_service_config.xml
+
+    We define everything here in XML and removed the programmatic
+    serviceInfo override in AppBlockerService.onServiceConnected()
+    to avoid the two configs conflicting with each other.
+-->
+<accessibility-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/accessibility_service_description"
+    android:notificationTimeout="100"
+    android:settingsActivity=".MainActivity" />
+    <!--
+        NOTE: packageNames attribute is intentionally absent (not empty string "").
+        An absent packageNames means "watch all packages".
+        An empty string packageNames="" is invalid and may crash on some ROMs.
+    -->

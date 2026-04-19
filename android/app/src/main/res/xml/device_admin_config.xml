@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Place at: android/app/src/main/res/xml/device_admin_config.xml
+
+    Declares which Device Admin policies our receiver uses.
+    We only need WIPE_DATA capability to prevent uninstallation —
+    Android treats any active Device Admin as uninstall-protected.
+-->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <!-- Required — having ANY active policy prevents uninstallation -->
+        <limit-password />
+    </uses-policies>
+</device-admin>
