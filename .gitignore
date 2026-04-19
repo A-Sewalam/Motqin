@@ -5,8 +5,8 @@
 *.userosscache
 *.sln.docstates
 
-# Settings
-Motqin/appsettings.Development.json
+# App.Settings
+
 
 
 # Build results
