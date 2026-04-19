@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 const List<String> kDefaultBlockedPackages = [
@@ -18,7 +19,7 @@ class AppBlockChannel {
     try {
       return await _channel.invokeMethod<bool>('isAccessibilityEnabled') ?? false;
     } on PlatformException catch (e) {
-      print('[AppBlockChannel] isAccessibilityEnabled failed: $e');
+      debugPrint('[AppBlockChannel] isAccessibilityEnabled failed: $e');
       return false;
     }
   }
@@ -27,7 +28,7 @@ class AppBlockChannel {
     try {
       await _channel.invokeMethod('openAccessibilitySettings');
     } on PlatformException catch (e) {
-      print('[AppBlockChannel] openAccessibilitySettings failed: $e');
+      debugPrint('[AppBlockChannel] openAccessibilitySettings failed: $e');
     }
   }
 
@@ -37,7 +38,7 @@ class AppBlockChannel {
         'packages': packages ?? kDefaultBlockedPackages,
       });
     } on PlatformException catch (e) {
-      print('[AppBlockChannel] startBlock failed: $e');
+      debugPrint('[AppBlockChannel] startBlock failed: $e');
       rethrow;
     }
   }
@@ -46,7 +47,7 @@ class AppBlockChannel {
     try {
       await _channel.invokeMethod('stopBlock');
     } on PlatformException catch (e) {
-      print('[AppBlockChannel] stopBlock failed: $e');
+      debugPrint('[AppBlockChannel] stopBlock failed: $e');
       rethrow;
     }
   }
@@ -55,7 +56,7 @@ class AppBlockChannel {
     try {
       return await _channel.invokeMethod<bool>('isBlockActive') ?? false;
     } on PlatformException catch (e) {
-      print('[AppBlockChannel] isBlockActive failed: $e');
+      debugPrint('[AppBlockChannel] isBlockActive failed: $e');
       return false;
     }
   }
@@ -65,11 +66,28 @@ class AppBlockChannel {
     try {
       await _channel.invokeMethod('syncBlockState');
     } on PlatformException catch (e) {
-      print('[AppBlockChannel] syncBlockState failed: $e');
+      debugPrint('[AppBlockChannel] syncBlockState failed: $e');
     }
   }
 
-  Future<void> requestDeviceAdmin() async {}
 
-  Future<bool> isDeviceAdminActive() async {}
+
+
+
+  Future<void> requestDeviceAdmin() async {
+    try {
+      await _channel.invokeMethod('requestDeviceAdmin');
+    } on PlatformException catch (e) {
+      debugPrint('[AppBlockChannel] requestDeviceAdmin failed: $e');
+    }
+  }
+
+  Future<bool> isDeviceAdminActive() async {
+    try {
+      return await _channel.invokeMethod<bool>('isDeviceAdminActive') ?? false;
+    } on PlatformException catch (e) {
+      debugPrint('[AppBlockChannel] isDeviceAdminActive failed: $e');
+      return false;
+    }
+  }
 }

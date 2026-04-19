@@ -192,5 +192,6 @@ class TimedBlockService extends ChangeNotifier {
   @override
   void dispose() {
     // Singleton — intentionally not disposed
+    super.dispose();
   }
 }

@@ -108,6 +108,7 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
     final chosen = DateTime(
         picked.year, picked.month, picked.day, time.hour, time.minute);
     if (chosen.isBefore(DateTime.now())) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('يجب اختيار وقت في المستقبل',
@@ -156,6 +157,7 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
                 'الساعة ${session.endTime.hour}:${session.endTime.minute.toString().padLeft(2, '0')}',
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content:
