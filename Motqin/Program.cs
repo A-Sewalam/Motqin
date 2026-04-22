@@ -41,7 +41,7 @@ namespace Motqin
             var TokenValidationParameters = new TokenValidationParameters()
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JWT:Secret"])),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JWT:Secret"]?? "1234567890123456789012345678901234567890")),
 
                 ValidateIssuer = true,
                 ValidIssuer = builder.Configuration["JWT:Issuer"],
