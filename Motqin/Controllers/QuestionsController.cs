@@ -23,7 +23,7 @@ namespace Motqin.Controllers
             return Ok(items);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("Question/Get/{id:int}")]
         public async Task<ActionResult<Question>> GetById(int id)
         {
             var item = await _questionsService.GetByIdAsync(id);
@@ -44,16 +44,19 @@ namespace Motqin.Controllers
             var items = await _questionsService.GetByCategoryAndLessonIdAsync(category, lessonId);
             return Ok(items);
         }
-        [HttpGet("{id:int}")]
+        [HttpGet("Start/{id:int}")]
         public async Task<ActionResult<Question>> StartQuestion(int id,DateTime startTime)
         {
             var question = await _questionsService.GetDetailsByIdAsync(id);
+            if (question is null) return NotFound();
             question.StartTime = startTime;
             return Ok(question);
         }
+        [HttpGet("End/{id:int}")]
         public async Task<ActionResult<Question>> EndQuestion(int id,DateTime endTime, string userAnswer, bool isCorrect)
         {
             var question = await _questionsService.GetDetailsByIdAsync(id);
+            if (question is null) return NotFound();
             question.EndTime = endTime;
             question.UserAnswer = userAnswer;
             question.IsCorrect = isCorrect;
@@ -103,6 +106,43 @@ namespace Motqin.Controllers
             var deleted = await _questionsService.DeleteAsync(id);
             if (!deleted) return NotFound();
             return NoContent();
+        }
+        [HttpDelete("U/{id:int}")]
+        public async Task<IActionResult> DeleteUserQuestion(int id,string UserId)
+        {
+            await _questionsService.UserDeleteQuestion(id, UserId);
+            return NoContent();
+        }
+
+        [HttpPost("U/Fill")]
+        public async Task<ActionResult<UserAddedQuestion>> UserAddFill([FromBody] FillInTheBlankQuestionDto dto)
+        {
+            var question = new UserAddedQuestion
+            {
+                LessonID = dto.LessonID,
+                DisplayOrder = 0,
+                Priority = 2,
+                QuestionCategory = dto.QuestionCategory,
+                QuestionText = dto.QuestionText,
+                DifficultyLevel = dto.DifficultyLevel
+            };
+            await _questionsService.UserAddQuestion(question);
+            return CreatedAtAction(nameof(GetById), new { id = question.ID }, question);
+        }
+        [HttpPost("U/MCQ")]
+        public async Task<ActionResult<UserAddedQuestion>> UserAddMCQ([FromBody] MultipleChoiceQuestionDto dto)
+        {
+            var question = new UserAddedQuestion
+            {
+                LessonID = dto.LessonID,
+                DisplayOrder = 0,
+                Priority = 2,
+                QuestionCategory = dto.QuestionCategory,
+                QuestionText = dto.QuestionText,
+                DifficultyLevel = dto.DifficultyLevel
+            };
+            await _questionsService.UserAddQuestion(question);
+            return CreatedAtAction(nameof(GetById), new { id = question.ID }, question);
         }
     }
 }

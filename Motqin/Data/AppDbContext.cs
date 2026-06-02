@@ -4,9 +4,29 @@ using Motqin.Models;
 using Motqin.Models.Session;
 using SchoolApp.API.Data.Models;
 using System.Numerics;
-
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 namespace Motqin.Data
 {
+    public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+    {
+        public AppDbContext CreateDbContext(string[] args)
+        {
+            IConfigurationRoot config = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../Motqin"))
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+
+            // Use the exact same key as in Program.cs
+            var connectionString = config.GetConnectionString("DefaultConnectionString");
+
+            optionsBuilder.UseSqlServer(connectionString);
+
+            return new AppDbContext(optionsBuilder.Options);
+        }
+    }
     public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -23,7 +43,8 @@ namespace Motqin.Data
 
         public DbSet<Question> Questions { get; set; }
         public DbSet<QuestionDetails> QuestionDetails { get; set; }
-        public DbSet<SpacedRepetitionSession> StudySessions { get; set; }
+        public DbSet<SpacedRepetitionSession> SpacedRepetitionSessions { get; set; }
+        public DbSet<StudySession> StudySessions { get; set; }
         public DbSet<StudyPlan> StudyPlans { get; set; }
 
         public DbSet<DistractionControl> DistractionControls { get; set; }
@@ -32,6 +53,9 @@ namespace Motqin.Data
         public DbSet<CompetitionEntry> CompetitionEntries { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+        public DbSet<UserDeletedQuestion> UserDeletedQuestions { get; set; }
+        public DbSet<UserAddedQuestion> UserAddedQuestions { get; set; }
+        public DbSet<UserAddedQuestionDetails> UserAddedQuestionDetails { get; set; }
 
         // =========================
         // Fluent API Configuration

@@ -60,7 +60,7 @@ namespace Motqin.Services
         }
         public async Task<SpacedRepetitionSession?> GetStudySessionById(int id)
         {
-            return await _context.StudySessions.AsNoTracking().FirstOrDefaultAsync(s => s.SessionID == id);
+            return await _context.SpacedRepetitionSessions.AsNoTracking().FirstOrDefaultAsync(s => s.SessionID == id);
         }
         public async Task<Subject> CreateAsync(SubjectDto subjectDto)
         {
