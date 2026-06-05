@@ -10,22 +10,20 @@ namespace Motqin.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "PrevSpacedRepetitionSessionId",
+            migrationBuilder.RenameColumn(
+                name: "RepetitionNumber",
                 table: "StudyPlans",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+                newName: "SpacedRepetitionSessionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudyPlans_PrevSpacedRepetitionSessionId",
+                name: "IX_StudyPlans_SpacedRepetitionSessionId",
                 table: "StudyPlans",
-                column: "PrevSpacedRepetitionSessionId");
+                column: "SpacedRepetitionSessionId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_StudyPlans_SpacedRepetitionSessions_PrevSpacedRepetitionSessionId",
+                name: "FK_StudyPlans_SpacedRepetitionSessions_SpacedRepetitionSessionId",
                 table: "StudyPlans",
-                column: "PrevSpacedRepetitionSessionId",
+                column: "SpacedRepetitionSessionId",
                 principalTable: "SpacedRepetitionSessions",
                 principalColumn: "SessionID",
                 onDelete: ReferentialAction.Cascade);
@@ -35,16 +33,17 @@ namespace Motqin.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_StudyPlans_SpacedRepetitionSessions_PrevSpacedRepetitionSessionId",
+                name: "FK_StudyPlans_SpacedRepetitionSessions_SpacedRepetitionSessionId",
                 table: "StudyPlans");
 
             migrationBuilder.DropIndex(
-                name: "IX_StudyPlans_PrevSpacedRepetitionSessionId",
+                name: "IX_StudyPlans_SpacedRepetitionSessionId",
                 table: "StudyPlans");
 
-            migrationBuilder.DropColumn(
-                name: "PrevSpacedRepetitionSessionId",
-                table: "StudyPlans");
+            migrationBuilder.RenameColumn(
+                name: "SpacedRepetitionSessionId",
+                table: "StudyPlans",
+                newName: "RepetitionNumber");
         }
     }
 }

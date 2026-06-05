@@ -12,7 +12,7 @@ using Motqin.Data;
 namespace Motqin.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260605205245_Add spacedrepititionsession to studyplan")]
+    [Migration("20260605230437_Add spacedrepititionsession to studyplan")]
     partial class Addspacedrepititionsessiontostudyplan
     {
         /// <inheritdoc />
@@ -407,13 +407,10 @@ namespace Motqin.Migrations
                     b.Property<DateTime>("NextReviewDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PrevSpacedRepetitionSessionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RepetitionNumber")
-                        .HasColumnType("int");
-
                     b.Property<int>("ReviewInterval")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SpacedRepetitionSessionId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -429,7 +426,7 @@ namespace Motqin.Migrations
 
                     b.HasIndex("LessonID");
 
-                    b.HasIndex("PrevSpacedRepetitionSessionId");
+                    b.HasIndex("SpacedRepetitionSessionId");
 
                     b.HasIndex("UserID");
 
@@ -927,7 +924,7 @@ namespace Motqin.Migrations
 
                     b.HasOne("Motqin.Models.Session.SpacedRepetitionSession", "SpacedRepetitionSession")
                         .WithMany()
-                        .HasForeignKey("PrevSpacedRepetitionSessionId")
+                        .HasForeignKey("SpacedRepetitionSessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

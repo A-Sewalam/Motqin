@@ -32,7 +32,7 @@ namespace Motqin.Models
         [ForeignKey("LessonID")]
         public virtual Lesson Lesson { get; set; }
 
-        [ForeignKey("PrevSpacedRepetitionSessionId")]
+        [ForeignKey("SpacedRepetitionSessionId")]
         public virtual SpacedRepetitionSession SpacedRepetitionSession { get; set; }
     }
 }
