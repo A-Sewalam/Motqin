@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Motqin.Models;
+using Motqin.Models.Payment;
 using Motqin.Models.Session;
 using SchoolApp.API.Data.Models;
 using System.Numerics;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
+using System.Reflection;
+using System.Reflection.Metadata;
 namespace Motqin.Data
 {
     public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
@@ -56,6 +59,11 @@ namespace Motqin.Data
         public DbSet<UserDeletedQuestion> UserDeletedQuestions { get; set; }
         public DbSet<UserAddedQuestion> UserAddedQuestions { get; set; }
         public DbSet<UserAddedQuestionDetails> UserAddedQuestionDetails { get; set; }
+
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<Bundle> Bundles { get; set; }
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<UserSubscription> UserSubscriptions { get; set; }
 
         // =========================
         // Fluent API Configuration
@@ -182,6 +190,11 @@ namespace Motqin.Data
             modelBuilder.Entity<Subject>()
                 .Property(s => s.GradeLevel)
                 .HasConversion<string>();
+
+            // -------------------------------------------------
+            // Payment Configuration 
+            // -------------------------------------------------
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }
