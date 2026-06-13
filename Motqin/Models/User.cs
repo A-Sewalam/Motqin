@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Motqin.Enums;
+using Motqin.Models.Payment;
 using Motqin.Models.Session;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Motqin.Models
@@ -19,5 +19,9 @@ namespace Motqin.Models
         public virtual ICollection<StudyPlan> StudyPlans { get; set; } = []; 
         public virtual ICollection<DistractionControl> DistractionControls { get; set; } = [];
         public virtual ICollection<CompetitionEntry> CompetitionEntries { get; set; } = [];
+
+        // for payment
+        public virtual Wallet Wallet { get; set; } = null!;
+        public virtual ICollection<UserSubscription> Subscriptions { get; set; } = new List<UserSubscription>();
     }
 }
