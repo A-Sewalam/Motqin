@@ -19,7 +19,7 @@ namespace Motqin.Models.Session
         [Required]
         public string QuestionsCategory { get; set; }
 
-        public int RepetitionNumber { get; set; }
+        public int RepetitionNumber { get; set; } = 0;
 
         public StudySessionStatuses StudySessionStatuses { get; set; }
 

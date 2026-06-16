@@ -45,6 +45,8 @@ namespace Motqin
             builder.Services.AddScoped<Services.SubjectsService>();
             builder.Services.AddScoped<Services.QuestionsService>();
             builder.Services.AddScoped<Services.ISubjectsService, Services.SubjectsService>();
+            builder.Services.AddScoped<Services.IPlanService, Services.PlanService>();
+            builder.Services.AddScoped<Services.ISessionService, Services.SessionService>();
 
             //EmailService
             builder.Services.AddScoped<IEmailService, SendGridEmailService>();
