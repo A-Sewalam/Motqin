@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Motqin.Data;
 
@@ -11,9 +12,11 @@ using Motqin.Data;
 namespace Motqin.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260606162147_UpdateWalletTransactionTable")]
+    partial class UpdateWalletTransactionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -537,10 +540,10 @@ namespace Motqin.Migrations
                     b.Property<DateTime>("NextReviewDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ReviewInterval")
+                    b.Property<int>("RepetitionNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("SpacedRepetitionSessionId")
+                    b.Property<int>("ReviewInterval")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -555,8 +558,6 @@ namespace Motqin.Migrations
                     b.HasKey("PlanID");
 
                     b.HasIndex("LessonID");
-
-                    b.HasIndex("SpacedRepetitionSessionId");
 
                     b.HasIndex("UserID");
 
@@ -1093,12 +1094,6 @@ namespace Motqin.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Motqin.Models.Session.SpacedRepetitionSession", "SpacedRepetitionSession")
-                        .WithMany()
-                        .HasForeignKey("SpacedRepetitionSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Motqin.Models.User", "User")
                         .WithMany("StudyPlans")
                         .HasForeignKey("UserID")
@@ -1106,8 +1101,6 @@ namespace Motqin.Migrations
                         .IsRequired();
 
                     b.Navigation("Lesson");
-
-                    b.Navigation("SpacedRepetitionSession");
 
                     b.Navigation("User");
                 });

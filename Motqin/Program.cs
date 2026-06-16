@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Motqin.Data;
 using Motqin.Models;
 using Motqin.Services;
+using Motqin.Services.Payment;
 using System.Text;
 
 namespace Motqin
@@ -25,9 +26,20 @@ namespace Motqin
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
             });
 
+            // configure cors policy
+            builder.Services.AddCors(options =>
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                })
+            );
+
             //Configure DBContext with SQL
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+            
             builder.Services.AddScoped<Services.IUsersService, Services.UsersService>();
             builder.Services.AddScoped<Services.ILessonsService, Services.LessonsService>();
             builder.Services.AddScoped<Services.SubjectsService>();
@@ -39,6 +51,9 @@ namespace Motqin
             //EmailService
             builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 
+            // Payment & Sub Services
+            builder.Services.AddScoped<IPaymobService, PaymobService>();
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
             var TokenValidationParameters = new TokenValidationParameters()
             {
@@ -51,7 +66,7 @@ namespace Motqin
                 ValidateAudience = true,
                 ValidAudience = builder.Configuration["JWT:Audience"],
 
-                  ValidateLifetime = true,
+                ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             };
 
@@ -94,6 +109,7 @@ namespace Motqin
                 app.UseSwagger();
                 app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"));
             }
+            app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
 
