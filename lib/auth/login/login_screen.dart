@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Logo ──────────────────────────────────────────────────────
-              SizedBox(height: height * 0.02),
+              SizedBox(height: height * 0.03),
               Center(
                 child: Image.asset(
                   AppAssets.appLogo,
@@ -102,52 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: Theme.of(context).textTheme.labelLarge,
               ),
 
-              // ── Facebook ──────────────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                child: CustomElevatedButton(
-                  backgroundColor: AppColors.whiteColor,
-                  onpressed: () {},
-                  label: Text(
-                    AppLocalizations.of(context)!.sign_up_with_facebook,
-                    style: AppStyles.medium16MainColor,
-                  ),
-                  icon: const Icon(FontAwesomeIcons.facebook, color: Colors.blue),
-                ),
-              ),
-
-              // ── Google ────────────────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                child: CustomElevatedButton(
-                  backgroundColor: AppColors.whiteColor,
-                  onpressed: () {},
-                  label: Text(
-                    AppLocalizations.of(context)!.sign_up_with_google,
-                    style: AppStyles.medium16MainColor,
-                  ),
-                  icon: Image.asset(AppAssets.googleLogo, height: 24, width: 24),
-                ),
-              ),
-
-              // ── Divider ───────────────────────────────────────────────────
-              Row(children: [
-                Expanded(
-                    child: Divider(
-                        color: AppColors.lightGreyColor,
-                        thickness: 2,
-                        indent: width * 0.02,
-                        endIndent: width * 0.06)),
-                Text(AppLocalizations.of(context)!.or,
-                    style: AppStyles.medium16MainColor),
-                Expanded(
-                    child: Divider(
-                        color: AppColors.lightGreyColor,
-                        thickness: 2,
-                        indent: width * 0.06,
-                        endIndent: width * 0.02)),
-              ]),
-
+              
               // ── Email field ───────────────────────────────────────────────
               CustomTextField(
                 controller: _emailController,
@@ -249,7 +204,55 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
 
-              SizedBox(height: height * 0.02),
+
+              // ── Divider ───────────────────────────────────────────────────
+              Row(children: [
+                Expanded(
+                    child: Divider(
+                        color: AppColors.lightGreyColor,
+                        thickness: 2,
+                        indent: width * 0.02,
+                        endIndent: width * 0.06)),
+                Text(AppLocalizations.of(context)!.or,
+                    style: AppStyles.medium16MainColor),
+                Expanded(
+                    child: Divider(
+                        color: AppColors.lightGreyColor,
+                        thickness: 2,
+                        indent: width * 0.06,
+                        endIndent: width * 0.02)),
+              ]),
+
+
+              // ── Facebook ──────────────────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: CustomElevatedButton(
+                  backgroundColor: AppColors.whiteColor,
+                  onpressed: () {},
+                  label: Text(
+                    AppLocalizations.of(context)!.sign_up_with_facebook,
+                    style: AppStyles.medium16MainColor,
+                  ),
+                  icon: const Icon(FontAwesomeIcons.facebook, color: Colors.blue),
+                ),
+              ),
+
+              // ── Google ────────────────────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: CustomElevatedButton(
+                  backgroundColor: AppColors.whiteColor,
+                  onpressed: () => Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.verifyEmailRouteName),
+                  label: Text(
+                    AppLocalizations.of(context)!.sign_up_with_google,
+                    style: AppStyles.medium16MainColor,
+                  ),
+                  icon: Image.asset(AppAssets.googleLogo, height: 19, width: 19),
+                ),
+              ),
+
             ],
           ),
         ),

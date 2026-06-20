@@ -25,12 +25,14 @@
             </intent-filter>
         </activity>
 
-        <!-- Blocked-app overlay screen -->
+        <!-- Blocked-app overlay screen (hosts a Flutter UI, see blockOverlayMain entrypoint) -->
         <activity
             android:name=".BlockedAppActivity"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:excludeFromRecents="true"
             android:taskAffinity=""
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="false" />
 
         <!-- Allowed-apps quick launcher, opened from the block screen -->

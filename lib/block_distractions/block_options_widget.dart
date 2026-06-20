@@ -4,7 +4,15 @@ import 'timed_block_service.dart';
 class BlockOptionsWidget extends StatefulWidget {
   final void Function(bool blocked) onToggleBlock;
 
-  const BlockOptionsWidget({super.key, required this.onToggleBlock});
+  /// The packages the user selected in RestrictAppUsageWidget.
+  /// When non-empty, only these are blocked instead of the default list.
+  final Set<String> customPackages;
+
+  const BlockOptionsWidget({
+    super.key,
+    required this.onToggleBlock,
+    this.customPackages = const {},
+  });
 
   @override
   State<BlockOptionsWidget> createState() => _BlockOptionsWidgetState();
@@ -131,7 +139,14 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
     try {
       final endTime = _selectedOption == 2 && _selectedDateTime != null
           ? _selectedDateTime!
-          : DateTime.now().add(const Duration(seconds: 5));
+          : DateTime.now().add(const Duration(days: 365));
+
+      // Use user-selected packages if any, otherwise fall back to defaults
+      if (widget.customPackages.isNotEmpty) {
+        _blockService.customPackages = widget.customPackages.toList();
+      } else {
+        _blockService.customPackages = null;
+      }
 
       await _blockService.startBlock(
         mode: _selectedOption == 1

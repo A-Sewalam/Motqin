@@ -9,11 +9,16 @@ class BlockDistractionsScreen extends StatefulWidget {
   const BlockDistractionsScreen({super.key});
 
   @override
-  State<BlockDistractionsScreen> createState() => _BlockDistractionsScreenState();
+  State<BlockDistractionsScreen> createState() =>
+      _BlockDistractionsScreenState();
 }
 
 class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   bool _allBlocked = false;
+
+  /// Kept in sync by RestrictAppUsageWidget via onPackagesChanged.
+  /// Passed down to BlockOptionsWidget so startBlock uses the right list.
+  Set<String> _selectedPackages = {};
 
   @override
   void initState() {
@@ -23,6 +28,10 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
 
   void _onToggleBlock(bool blocked) {
     setState(() => _allBlocked = blocked);
+  }
+
+  void _onPackagesChanged(Set<String> packages) {
+    setState(() => _selectedPackages = packages);
   }
 
   Future<void> _checkAccessibilityPermission() async {
@@ -56,9 +65,15 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              RestrictAppUsageWidget(allBlocked: _allBlocked),
+              RestrictAppUsageWidget(
+                allBlocked: _allBlocked,
+                onPackagesChanged: _onPackagesChanged,
+              ),
               const SizedBox(height: 20),
-              BlockOptionsWidget(onToggleBlock: _onToggleBlock),
+              BlockOptionsWidget(
+                onToggleBlock: _onToggleBlock,
+                customPackages: _selectedPackages,
+              ),
               const SizedBox(height: 20),
               const AdminSettingsWidget(),
               const SizedBox(height: 24),

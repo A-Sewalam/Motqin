@@ -1,13 +1,28 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app_block_channel.dart';
 import 'timed_block_service.dart';
 
 // ── Widget ────────────────────────────────────────────────────────────────────
+//
+// The user picks apps that are ALLOWED during a block session.
+// Every other installed app will be blocked.
+// The callback exposes the BLOCKED packages (all apps minus allowed ones).
 
 class RestrictAppUsageWidget extends StatefulWidget {
   final bool allBlocked;
 
-  const RestrictAppUsageWidget({super.key, required this.allBlocked});
+  /// Called whenever the selection changes.
+  /// Passes the SET OF PACKAGES TO BLOCK (= all apps − allowed apps).
+  final void Function(Set<String> packagesToBlock)? onPackagesChanged;
+
+  const RestrictAppUsageWidget({
+    super.key,
+    required this.allBlocked,
+    this.onPackagesChanged,
+  });
 
   @override
   State<RestrictAppUsageWidget> createState() => _RestrictAppUsageWidgetState();
@@ -17,18 +32,19 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
   final TimedBlockService _blockService = TimedBlockService();
   final AppBlockChannel _channel = AppBlockChannel();
 
-  /// All apps installed on the device
+  static const _kPrefsKey = 'allowed_packages_during_block';
+
   List<InstalledApp> _allApps = [];
   bool _loadingApps = false;
 
-  /// Package names the user chose to block
-  final Set<String> _selectedPackages = {};
+  /// Packages the user explicitly marked as ALLOWED (not blocked).
+  final Set<String> _allowedPackages = {};
 
   @override
   void initState() {
     super.initState();
     _blockService.addListener(_onBlockStateChanged);
-    _loadApps();
+    _loadPersistedPackages().then((_) => _loadApps());
   }
 
   @override
@@ -37,10 +53,46 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
     super.dispose();
   }
 
+  // ── Persistence ───────────────────────────────────────────────────────────
+
+  Future<void> _loadPersistedPackages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getStringList(_kPrefsKey);
+    if (stored != null && mounted) {
+      setState(() => _allowedPackages.addAll(stored));
+      _notifyBlockedPackages();
+    }
+  }
+
+  Future<void> _persistPackages() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_kPrefsKey, _allowedPackages.toList());
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  /// Everything NOT in _allowedPackages gets blocked.
+  Set<String> get _packagesToBlock => _allApps
+      .map((a) => a.packageName)
+      .where((pkg) => !_allowedPackages.contains(pkg))
+      .toSet();
+
+  void _notifyBlockedPackages() {
+    widget.onPackagesChanged?.call(_packagesToBlock);
+  }
+
+  // ── Data ─────────────────────────────────────────────────────────────────
+
   Future<void> _loadApps() async {
     setState(() => _loadingApps = true);
     final apps = await _channel.getInstalledApps();
-    if (mounted) setState(() { _allApps = apps; _loadingApps = false; });
+    if (mounted) {
+      setState(() {
+        _allApps = apps;
+        _loadingApps = false;
+      });
+      _notifyBlockedPackages();
+    }
   }
 
   void _onBlockStateChanged() {
@@ -51,10 +103,13 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
   void didUpdateWidget(RestrictAppUsageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.allBlocked && !oldWidget.allBlocked) {
-      setState(() => _selectedPackages
-          .addAll(_allApps.map((a) => a.packageName)));
+      // "Block all" — clear allowed list so everything is blocked
+      setState(() => _allowedPackages.clear());
+      _persistPackages();
+      _notifyBlockedPackages();
     } else if (!widget.allBlocked && oldWidget.allBlocked) {
-      setState(() => _selectedPackages.clear());
+      // Restore — reload persisted allowed list
+      _loadPersistedPackages();
     }
   }
 
@@ -66,10 +121,14 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
       backgroundColor: Colors.transparent,
       builder: (_) => _AppPickerSheet(
         allApps: _allApps,
-        selectedPackages: Set.from(_selectedPackages),
-        onDone: (selected) => setState(() {
-          _selectedPackages..clear()..addAll(selected);
-        }),
+        allowedPackages: Set.from(_allowedPackages),
+        onDone: (allowed) {
+          setState(() {
+            _allowedPackages..clear()..addAll(allowed);
+          });
+          _persistPackages();
+          _notifyBlockedPackages();
+        },
       ),
     );
   }
@@ -77,11 +136,11 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
   @override
   Widget build(BuildContext context) {
     final bool isBlocking = _blockService.isActive;
-    final int count = _selectedPackages.length;
+    final int allowedCount = _allowedPackages.length;
+    final int blockedCount = _allApps.length - allowedCount;
 
-    // Selected app objects for the chip preview
-    final selected = _allApps
-        .where((a) => _selectedPackages.contains(a.packageName))
+    final allowedApps = _allApps
+        .where((a) => _allowedPackages.contains(a.packageName))
         .toList();
 
     return Container(
@@ -101,14 +160,14 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──────────────────────────────────────────────────────
+          // ── Header ────────────────────────────────────────────────────
           Row(
             children: [
               const Icon(Icons.smartphone_outlined,
                   color: Color(0xFF2563EB), size: 22),
               const SizedBox(width: 10),
               const Text(
-                'التطبيقات المحجوبة',
+                'التطبيقات المسموحة',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -116,7 +175,7 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
                 ),
               ),
               const Spacer(),
-              if (count > 0)
+              if (_allApps.isNotEmpty)
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
@@ -125,7 +184,7 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '$count محجوب',
+                    '$blockedCount محجوب',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -137,7 +196,6 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
           ),
           const SizedBox(height: 16),
 
-          // ── Loading indicator ────────────────────────────────────────
           if (_loadingApps)
             const Center(
               child: Padding(
@@ -147,55 +205,75 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
               ),
             )
           else ...[
-            // ── Selected chips preview ─────────────────────────────────
-            if (selected.isNotEmpty) ...[
+            // ── Allowed chips preview ────────────────────────────────
+            if (allowedApps.isNotEmpty) ...[
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: selected
-                    .map((a) => _AppChip(app: a, isBlocking: isBlocking))
+                children: allowedApps
+                    .map((a) => _AppChip(app: a, allowed: true))
                     .toList(),
               ),
               const SizedBox(height: 16),
             ],
 
-            // ── Empty state ────────────────────────────────────────────
-            if (selected.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                      color: const Color(0xFFE5E7EB), width: 1.5),
-                ),
-                child: const Column(
-                  children: [
-                    Icon(Icons.shield_outlined,
-                        color: Color(0xFFD1D5DB), size: 36),
-                    SizedBox(height: 8),
-                    Text(
-                      'لم تختر أي تطبيق للحجب بعد',
-                      style: TextStyle(
-                          fontSize: 14, color: Color(0xFF9CA3AF)),
-                    ),
-                  ],
+            // ── Info box ─────────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                  vertical: 12, horizontal: 14),
+              decoration: BoxDecoration(
+                color: allowedApps.isEmpty
+                    ? const Color(0xFFFFF7ED)
+                    : const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: allowedApps.isEmpty
+                      ? const Color(0xFFFED7AA)
+                      : const Color(0xFFBFDBFE),
+                  width: 1,
                 ),
               ),
+              child: Row(
+                children: [
+                  Icon(
+                    allowedApps.isEmpty
+                        ? Icons.info_outline
+                        : Icons.check_circle_outline,
+                    color: allowedApps.isEmpty
+                        ? const Color(0xFFEA580C)
+                        : const Color(0xFF2563EB),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      allowedApps.isEmpty
+                          ? 'سيتم حجب جميع التطبيقات أثناء الجلسة'
+                          : 'سيتم السماح بـ $allowedCount تطبيق وحجب $blockedCount تطبيق',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: allowedApps.isEmpty
+                            ? const Color(0xFFEA580C)
+                            : const Color(0xFF2563EB),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
 
-            const SizedBox(height: 16),
-
-            // ── Choose apps button ─────────────────────────────────────
+            // ── Choose / edit button ─────────────────────────────────
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: isBlocking ? null : _openAppPicker,
                 icon: const Icon(Icons.apps_rounded, size: 20),
                 label: Text(
-                  count == 0
-                      ? 'اختر التطبيقات للحجب'
-                      : 'تعديل التطبيقات المحجوبة',
+                  allowedApps.isEmpty
+                      ? 'اختر التطبيقات المسموحة أثناء الحجب'
+                      : 'تعديل التطبيقات المسموحة',
                   style: const TextStyle(
                       fontSize: 15, fontWeight: FontWeight.bold),
                 ),
@@ -222,18 +300,18 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
 
 class _AppChip extends StatelessWidget {
   final InstalledApp app;
-  final bool isBlocking;
+  final bool allowed;
 
-  const _AppChip({required this.app, required this.isBlocking});
+  const _AppChip({required this.app, required this.allowed});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
+        color: const Color(0xFFEFF6FF),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFFECACA), width: 1),
+        border: Border.all(color: const Color(0xFFBFDBFE), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -245,7 +323,7 @@ class _AppChip extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFE11D48),
+              color: Color(0xFF2563EB),
             ),
           ),
         ],
@@ -269,9 +347,7 @@ class _AppIcon extends StatelessWidget {
     }
     try {
       return Image.memory(
-        InstalledApp(
-                name: '', packageName: '', iconBase64: iconBase64)
-            .iconBytes,
+        base64Decode(iconBase64),
         width: size,
         height: size,
         fit: BoxFit.contain,
@@ -288,12 +364,12 @@ class _AppIcon extends StatelessWidget {
 
 class _AppPickerSheet extends StatefulWidget {
   final List<InstalledApp> allApps;
-  final Set<String> selectedPackages;
-  final void Function(Set<String>) onDone;
+  final Set<String> allowedPackages;
+  final void Function(Set<String> allowedPackages) onDone;
 
   const _AppPickerSheet({
     required this.allApps,
-    required this.selectedPackages,
+    required this.allowedPackages,
     required this.onDone,
   });
 
@@ -302,13 +378,16 @@ class _AppPickerSheet extends StatefulWidget {
 }
 
 class _AppPickerSheetState extends State<_AppPickerSheet> {
-  late Set<String> _selected;
+  late Set<String> _allowed;
   String _query = '';
+
+  // 20 (list h-padding) + 24 (checkbox) + 12 + 44 (icon) + 12 = 112
+  static const double _nameIndent = 112.0;
 
   @override
   void initState() {
     super.initState();
-    _selected = Set.from(widget.selectedPackages);
+    _allowed = Set.from(widget.allowedPackages);
   }
 
   List<InstalledApp> get _filtered {
@@ -319,31 +398,32 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
         .toList();
   }
 
-  bool get _allSelected =>
-      widget.allApps.every((a) => _selected.contains(a.packageName));
+  bool get _allAllowed =>
+      widget.allApps.every((a) => _allowed.contains(a.packageName));
 
   void _toggleAll() {
     setState(() {
-      if (_allSelected) {
-        _selected.clear();
+      if (_allAllowed) {
+        _allowed.clear();
       } else {
-        _selected.addAll(widget.allApps.map((a) => a.packageName));
+        _allowed.addAll(widget.allApps.map((a) => a.packageName));
       }
     });
   }
 
   void _toggle(InstalledApp app) {
     setState(() {
-      _selected.contains(app.packageName)
-          ? _selected.remove(app.packageName)
-          : _selected.add(app.packageName);
+      _allowed.contains(app.packageName)
+          ? _allowed.remove(app.packageName)
+          : _allowed.add(app.packageName);
     });
   }
+
+  int get _blockedCount => widget.allApps.length - _allowed.length;
 
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
-    final selectedCount = _selected.length;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -359,7 +439,7 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
           ),
           child: Column(
             children: [
-              // ── Handle ─────────────────────────────────────────────
+              // ── Handle ───────────────────────────────────────────
               const SizedBox(height: 12),
               Container(
                 width: 40,
@@ -371,21 +451,21 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
               ),
               const SizedBox(height: 16),
 
-              // ── Header ─────────────────────────────────────────────
+              // ── Header ───────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
                     const Text(
-                      'اختر التطبيقات للحجب',
+                      'اختر التطبيقات المسموحة أثناء الحجب',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                     ),
                     const Spacer(),
-                    if (selectedCount > 0)
+                    if (_blockedCount > 0)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 4),
@@ -394,7 +474,7 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          '$selectedCount مختار',
+                          '$_blockedCount محجوب',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -405,9 +485,19 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
                   ],
                 ),
               ),
+              const SizedBox(height: 6),
+
+              // ── Subtitle hint ─────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'التطبيقات المحددة ستعمل — الباقي سيُحجب',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                ),
+              ),
               const SizedBox(height: 14),
 
-              // ── Search ─────────────────────────────────────────────
+              // ── Search ────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextField(
@@ -431,7 +521,7 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
               ),
               const SizedBox(height: 12),
 
-              // ── Select all ─────────────────────────────────────────
+              // ── Allow all / Block all toggle ──────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: InkWell(
@@ -441,40 +531,45 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: _allSelected
-                          ? const Color(0xFFFFE4E6)
+                      color: _allAllowed
+                          ? const Color(0xFFEFF6FF)
                           : const Color(0xFFF9FAFB),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: _allSelected
-                            ? const Color(0xFFFECACA)
+                        color: _allAllowed
+                            ? const Color(0xFFBFDBFE)
                             : const Color(0xFFE5E7EB),
                         width: 1.5,
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _allSelected
-                              ? Icons.check_circle
-                              : Icons.circle_outlined,
-                          color: _allSelected
-                              ? const Color(0xFFE11D48)
-                              : const Color(0xFF9CA3AF),
-                          size: 22,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          _allSelected ? 'إلغاء تحديد الكل' : 'تحديد الكل',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: _allSelected
-                                ? const Color(0xFFE11D48)
-                                : Colors.black87,
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Row(
+                        children: [
+                          Icon(
+                            _allAllowed
+                                ? Icons.check_circle
+                                : Icons.circle_outlined,
+                            color: _allAllowed
+                                ? const Color(0xFF2563EB)
+                                : const Color(0xFF9CA3AF),
+                            size: 22,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Text(
+                            _allAllowed
+                                ? 'إلغاء تحديد الكل'
+                                : 'السماح بجميع التطبيقات',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: _allAllowed
+                                  ? const Color(0xFF2563EB)
+                                  : Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -482,19 +577,24 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
               const SizedBox(height: 8),
               const Divider(height: 1),
 
-              // ── Apps list ──────────────────────────────────────────
+              // ── Apps list ─────────────────────────────────────────
               Expanded(
                 child: ListView.separated(
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 12),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, _) =>
-                      const Divider(height: 1, indent: 64),
+                  separatorBuilder: (_, _) => Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Divider(
+                      height: 1,
+                      indent: _nameIndent,
+                      color: const Color(0xFFE5E7EB),
+                    ),
+                  ),
                   itemBuilder: (_, i) {
                     final app = filtered[i];
-                    final isSelected =
-                        _selected.contains(app.packageName);
+                    final isAllowed = _allowed.contains(app.packageName);
                     return InkWell(
                       onTap: () => _toggle(app),
                       child: Padding(
@@ -504,48 +604,67 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
                           textDirection: TextDirection.ltr,
                           child: Row(
                             children: [
-                              // Checkbox on the far left
+                              // Checkbox
                               Icon(
-                                isSelected
+                                isAllowed
                                     ? Icons.check_circle
                                     : Icons.circle_outlined,
-                                color: isSelected
-                                    ? const Color(0xFFE11D48)
+                                color: isAllowed
+                                    ? const Color(0xFF2563EB)
                                     : const Color(0xFFD1D5DB),
                                 size: 24,
                               ),
                               const SizedBox(width: 12),
-                              // App icon
+                              // App icon — greyed out if blocked
                               Container(
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? const Color(0xFFFFE4E6)
+                                  color: isAllowed
+                                      ? const Color(0xFFEFF6FF)
                                       : const Color(0xFFF3F4F6),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(4),
-                                  child: _AppIcon(
-                                      iconBase64: app.iconBase64,
-                                      size: 36),
+                                  child: Opacity(
+                                    opacity: isAllowed ? 1.0 : 0.4,
+                                    child: _AppIcon(
+                                        iconBase64: app.iconBase64,
+                                        size: 36),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               // App name
                               Expanded(
-                                child: Text(
-                                  app.name,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: isSelected
-                                        ? const Color(0xFFE11D48)
-                                        : Colors.black87,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      app.name,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: isAllowed
+                                            ? Colors.black87
+                                            : Colors.grey,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      isAllowed ? 'مسموح' : 'سيُحجب',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isAllowed
+                                            ? const Color(0xFF2563EB)
+                                            : const Color(0xFFE11D48),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -557,7 +676,7 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
                 ),
               ),
 
-              // ── Bottom buttons ─────────────────────────────────────
+              // ── Bottom buttons ────────────────────────────────────
               Padding(
                 padding: EdgeInsets.fromLTRB(
                     20,
@@ -591,11 +710,11 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
                       flex: 2,
                       child: ElevatedButton(
                         onPressed: () {
-                          widget.onDone(Set.from(_selected));
+                          widget.onDone(Set.from(_allowed));
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE11D48),
+                          backgroundColor: const Color(0xFF2563EB),
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding:
@@ -604,12 +723,11 @@ class _AppPickerSheetState extends State<_AppPickerSheet> {
                               borderRadius: BorderRadius.circular(14)),
                         ),
                         child: Text(
-                          selectedCount == 0
-                              ? 'تأكيد'
-                              : 'حجب $selectedCount تطبيق',
+                          _blockedCount == 0
+                              ? 'تأكيد (لا حجب)'
+                              : 'تأكيد — حجب $_blockedCount تطبيق',
                           style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold),
+                              fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

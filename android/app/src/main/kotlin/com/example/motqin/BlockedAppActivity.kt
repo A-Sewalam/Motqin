@@ -19,7 +19,7 @@ import android.widget.TextView
 import kotlin.random.Random
 
 /**
- * Unified "block" screen.
+ * Unified "block" screen — pure native Kotlin UI (no Flutter engine involved).
  *
  * Shown in two situations:
  *  1. Right when a block session starts (launched from MainActivity).
@@ -50,6 +50,12 @@ class BlockedAppActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Safety net — never show the overlay over our own app.
+        if (intent?.getStringExtra(EXTRA_BLOCKED_PKG) == packageName) {
+            finishAndGoHome()
+            return
+        }
 
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or

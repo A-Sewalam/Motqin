@@ -15,10 +15,30 @@ class AppBlockerService : AccessibilityService() {
         private const val KEY_PACKAGES = "blocked_packages"
         private const val KEY_END_TIME = "block_end_time_millis"
 
-        /** Broadcast fired whenever the block is turned on/off, so any open
-         *  BlockedAppActivity can react immediately (e.g. dismiss itself). */
         const val ACTION_BLOCK_STATE_CHANGED = "com.example.motqin.BLOCK_STATE_CHANGED"
         const val EXTRA_ACTIVE = "active"
+
+        /** Packages that should NEVER be blocked regardless of user selection. */
+        private val SYSTEM_EXEMPT = setOf(
+            // Our own app
+            "com.example.motqin",
+            // Android system UI
+            "com.android.systemui",
+            // Common launchers — so the home screen is never blocked
+            "com.android.launcher",
+            "com.android.launcher2",
+            "com.android.launcher3",
+            "com.google.android.apps.nexuslauncher",   // Pixel
+            "com.sec.android.app.launcher",             // Samsung One UI
+            "com.miui.home",                            // Xiaomi MIUI
+            "com.huawei.android.launcher",              // Huawei
+            "com.oppo.launcher",                        // OPPO
+            "com.vivo.launcher",                        // Vivo
+            "com.bbk.launcher2",                        // BBK / iQOO
+            // Block-overlay and allowed-apps activities (our own)
+            "com.example.motqin.BlockedAppActivity",
+            "com.example.motqin.AllowedAppsActivity",
+        )
 
         fun setBlockActive(
             context: Context,
@@ -26,63 +46,61 @@ class AppBlockerService : AccessibilityService() {
             packages: Set<String> = emptySet(),
             endTimeMillis: Long = 0L
         ) {
-            Log.d(TAG, "setBlockActive called: active=$active, packages=$packages, endTime=$endTimeMillis")
+            Log.d(TAG, "setBlockActive: active=$active packages=$packages endTime=$endTimeMillis")
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().apply {
                 putBoolean(KEY_IS_ACTIVE, active)
-                putStringSet(KEY_PACKAGES, packages)
+                // Always strip exempt packages before persisting
+                putStringSet(KEY_PACKAGES, packages - SYSTEM_EXEMPT)
                 putLong(KEY_END_TIME, if (active) endTimeMillis else 0L)
                 apply()
             }
-
-            // Let any visible BlockedAppActivity know right away (e.g. admin cancelled,
-            // or the timer expired on the Flutter side).
             context.sendBroadcast(Intent(ACTION_BLOCK_STATE_CHANGED).apply {
                 putExtra(EXTRA_ACTIVE, active)
                 setPackage(context.packageName)
             })
         }
 
-        fun isBlockActive(context: Context): Boolean {
-            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        fun isBlockActive(context: Context): Boolean =
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .getBoolean(KEY_IS_ACTIVE, false)
-        }
 
-        fun getBlockedPackages(context: Context): Set<String> {
-            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        fun getBlockedPackages(context: Context): Set<String> =
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .getStringSet(KEY_PACKAGES, emptySet()) ?: emptySet()
-        }
 
-        /** Epoch millis when the active block ends, or 0L if no block is active. */
-        fun getBlockEndTimeMillis(context: Context): Long {
-            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        fun getBlockEndTimeMillis(context: Context): Long =
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .getLong(KEY_END_TIME, 0L)
-        }
     }
 
     override fun onServiceConnected() {
-        Log.d(TAG, "✅ AppBlockerService connected successfully")
+        Log.d(TAG, "✅ AppBlockerService connected")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
 
         val pkg = event.packageName?.toString() ?: return
+
+        // Always ignore our own app and system packages
+        if (pkg == packageName) return
+        if (pkg in SYSTEM_EXEMPT) return
+
         val isActive = isBlockActive(applicationContext)
+        if (!isActive) return
+
         val blocked = getBlockedPackages(applicationContext)
 
-        Log.d(TAG, "Window changed → pkg=$pkg | blockActive=$isActive | blockedList=$blocked")
-
-        if (!isActive) return
-        if (pkg == packageName || pkg == "com.android.systemui") return
+        Log.d(TAG, "Window → pkg=$pkg | blocked=${pkg in blocked}")
 
         if (pkg in blocked) {
-            Log.d(TAG, "🚫 BLOCKING: $pkg — launching BlockedAppActivity")
+            Log.d(TAG, "🚫 BLOCKING $pkg")
             launchBlockedScreen(pkg)
         }
     }
 
     override fun onInterrupt() {
-        Log.d(TAG, "onInterrupt called")
+        Log.d(TAG, "onInterrupt")
     }
 
     private fun launchBlockedScreen(blockedPkg: String) {

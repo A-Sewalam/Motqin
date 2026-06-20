@@ -74,12 +74,7 @@ class _SignupScreenState extends State<SignupScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Image.asset(AppAssets.appLogo, height: height * .1),
-          centerTitle: true,
-          toolbarHeight: height * .15,
-          backgroundColor: AppColors.bgColor,
-        ),
+        
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             languageProvider.changeLanguage(
@@ -102,6 +97,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     spacing: height * 0.02,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SizedBox(height: height * 0.03),
+
+                      Center(
+                        child: Image.asset(
+                          AppAssets.appLogo,
+                          height: height * 0.12,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+
                       Text(
                         AppLocalizations.of(context)!.create_your_account,
                         style: Theme.of(context).textTheme.labelLarge,
@@ -273,19 +278,6 @@ class _SignupScreenState extends State<SignupScreen> {
                                 endIndent: width * 0.02)),
                       ]),
 
-                      SizedBox(
-                        width: double.infinity,
-                        child: CustomElevatedButton(
-                          backgroundColor: AppColors.whiteColor,
-                          onpressed: () {},
-                          label: Text(
-                            AppLocalizations.of(context)!.sign_up_with_google,
-                            style: AppStyles.medium16MainColor,
-                          ),
-                          icon: const Icon(FontAwesomeIcons.google,
-                              color: AppColors.mainColor),
-                        ),
-                      ),
 
                       SizedBox(
                         width: double.infinity,
@@ -297,9 +289,22 @@ class _SignupScreenState extends State<SignupScreen> {
                             style: AppStyles.medium16MainColor,
                           ),
                           icon: const Icon(FontAwesomeIcons.facebook,
-                              color: AppColors.mainColor),
+                              color: Colors.blue),
                         ),
                       ),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: CustomElevatedButton(
+                          backgroundColor: AppColors.whiteColor,
+                          onpressed: () {},
+                          label: Text(
+                            AppLocalizations.of(context)!.sign_up_with_google,
+                            style: AppStyles.medium16MainColor,
+                          ),
+                          icon: Image.asset(AppAssets.googleLogo, height: 19, width: 19),
+
+                      ),)
                     ],
                   ),
                 ),

@@ -35,6 +35,7 @@ void main() async {
   );
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -45,26 +46,23 @@ class MyApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        // AuthBloc is available app-wide so any screen can react to auth state
         BlocProvider<AuthBloc>(
           create: (_) => sl<AuthBloc>()..add(const AuthCheckStatusRequested()),
         ),
-        // Add more blocs here as you build each feature:
-        // BlocProvider<SubjectBloc>(create: (_) => sl<SubjectBloc>()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         initialRoute: AppRoutes.loginRouteName,
         routes: {
-          AppRoutes.loginRouteName:                  (_) => const LoginScreen(),
-          AppRoutes.homeRouteName:                   (_) => const HomeScreen(),
-          AppRoutes.profileRouteName:                (_) => const ProfileScreen(),
-          AppRoutes.signupRouteName:                 (_) => const SignupScreen(),
-          AppRoutes.verifyEmailRouteName:            (_) => const VerifyEmailScreen(),
-          AppRoutes.leaderboardCompetitionsRouteName:(_) => const LeaderboardCompetitionsScreen(),
-          AppRoutes.masterYourLessonsRouteName:      (_) => const MasterLessonsScreen(),
-          AppRoutes.understandYourLessonsRouteName:  (_) => const UnderstandLessonsScreen(),
-          AppRoutes.blockDistractionsRouteName:      (_) => const BlockDistractionsScreen(),
+          AppRoutes.loginRouteName:                   (_) => const LoginScreen(),
+          AppRoutes.homeRouteName:                    (_) => const HomeScreen(),
+          AppRoutes.profileRouteName:                 (_) => const ProfileScreen(),
+          AppRoutes.signupRouteName:                  (_) => const SignupScreen(),
+          AppRoutes.verifyEmailRouteName:             (_) => const VerifyEmailScreen(),
+          AppRoutes.leaderboardCompetitionsRouteName: (_) => const LeaderboardCompetitionsScreen(),
+          AppRoutes.masterYourLessonsRouteName:       (_) => const MasterLessonsScreen(),
+          AppRoutes.understandYourLessonsRouteName:   (_) => const UnderstandLessonsScreen(),
+          AppRoutes.blockDistractionsRouteName:       (_) => const BlockDistractionsScreen(),
         },
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,

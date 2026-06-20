@@ -59,14 +59,19 @@ class MainActivity : FlutterActivity() {
                             result.error("INVALID_ARGS", "packages list is required", null)
                             return@setMethodCallHandler
                         }
-                        // endTime is optional for backward compatibility, but required
-                        // for the countdown screen to know when to stop.
                         val endTime = call.argument<Long>("endTime") ?: 0L
+
+                        // Strip our own package and system packages so they are never blocked
+                        val safePackages = packages.toMutableSet().apply {
+                            remove(packageName)
+                            remove("com.android.systemui")
+                            remove("com.android.launcher3")
+                        }
 
                         AppBlockerService.setBlockActive(
                             applicationContext,
                             active = true,
-                            packages = packages.toSet(),
+                            packages = safePackages,
                             endTimeMillis = endTime
                         )
                         Log.d(TAG, "✅ Block activated with packages: $packages, endTime=$endTime")
