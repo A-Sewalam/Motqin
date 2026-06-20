@@ -10,23 +10,39 @@ class CustomTextField extends StatelessWidget {
   Widget? suffixIcon;
   String? hintText;
   TextStyle? hintStyle;
-  String? labelText; 
+  String? labelText;
   TextStyle? labelStyle;
 
-  CustomTextField({super.key,
-   this.filled,
-  this.fillColor,
-  required this.borderColor, 
-  this.prefixIcon, 
-  this.suffixIcon,
-  this.hintText,
-  this.hintStyle,
-  this.labelText,
-  this.labelStyle,});
+  // Added fields needed for form validation and input handling
+  TextEditingController? controller;
+  bool obscureText;
+  TextInputType? keyboardType;
+  String? Function(String?)? validator;
+
+  CustomTextField({
+    super.key,
+    this.filled,
+    this.fillColor,
+    required this.borderColor,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.hintText,
+    this.hintStyle,
+    this.labelText,
+    this.labelStyle,
+    this.controller,
+    this.obscureText = false,
+    this.keyboardType,
+    this.validator,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: validator,
       decoration: InputDecoration(
         enabledBorder: builtDecoratedBorder(
           borderColor: borderColor,
@@ -46,15 +62,12 @@ class CustomTextField extends StatelessWidget {
         ),
         filled: filled,
         fillColor: fillColor,
-
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-
         hintText: hintText,
         hintStyle: hintStyle,
-
         labelText: labelText,
-        labelStyle: labelStyle,    
+        labelStyle: labelStyle,
       ),
     );
   }
@@ -62,7 +75,6 @@ class CustomTextField extends StatelessWidget {
   OutlineInputBorder builtDecoratedBorder({
     required Color borderColor,
     required double borderRadius,
-
   }) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),

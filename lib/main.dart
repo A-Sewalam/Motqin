@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:motqin/home/home_screen.dart';
 import 'package:motqin/home/profile_screen.dart';
 import 'package:motqin/auth/login/login_screen.dart';
@@ -9,52 +10,69 @@ import 'package:motqin/utils/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'l10n/app_localizations.dart';
 import 'auth/signup/signup_screen.dart';
+import 'auth/verify_email/verify_email_screen.dart';
 import 'leaderboard_competitions/leaderboard_competitions_screen.dart';
 import 'master_lessons/master_lessons_screen.dart';
 import 'understand_lessons/understand_lessons_screen.dart';
 import 'block_distractions/block_distractions_screen.dart';
-//import 'package:toggle_switch/toggle_switch.dart';
+import 'core/di/service_locator.dart';
+import 'features/auth/bloc/auth_bloc.dart';
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
+  // Set up all services and blocs via get_it
+  await setupServiceLocator();
 
-void main (){
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(
-      create: (context) => AppLanguageProvider(),),
-     ChangeNotifierProvider(
-      create: (context) => AppThemeProvider()),
-    ],
-    child: MyApp(),
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppLanguageProvider()),
+        ChangeNotifierProvider(create: (_) => AppThemeProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget{
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    var languageProvider = Provider.of<AppLanguageProvider>(context);
-    var themeProvider = Provider.of<AppThemeProvider>(context);
+    final languageProvider = Provider.of<AppLanguageProvider>(context);
+    final themeProvider = Provider.of<AppThemeProvider>(context);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.loginRouteName,
-      routes: {
-        AppRoutes.loginRouteName : (context) => LoginScreen(),
-        AppRoutes.homeRouteName : (context) => HomeScreen(),
-        AppRoutes.profileRouteName: (context) => ProfileScreen(),
-        AppRoutes.signupRouteName : (context) => SignupScreen(),
-        AppRoutes.leaderboardCompetitionsRouteName : (context) => LeaderboardCompetitionsScreen(),
-        AppRoutes.masterYourLessonsRouteName : (context) => MasterLessonsScreen(),
-        AppRoutes.understandYourLessonsRouteName : (context) => UnderstandLessonsScreen(),
-        AppRoutes.blockDistractionsRouteName : (context) => BlockDistractionsScreen(),
-      },
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeProvider.appTheme,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: Locale(languageProvider.appLanguage),
+    return MultiBlocProvider(
+      providers: [
+        // AuthBloc is available app-wide so any screen can react to auth state
+        BlocProvider<AuthBloc>(
+          create: (_) => sl<AuthBloc>()..add(const AuthCheckStatusRequested()),
+        ),
+        // Add more blocs here as you build each feature:
+        // BlocProvider<SubjectBloc>(create: (_) => sl<SubjectBloc>()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialRoute: AppRoutes.loginRouteName,
+        routes: {
+          AppRoutes.loginRouteName:                  (_) => const LoginScreen(),
+          AppRoutes.homeRouteName:                   (_) => const HomeScreen(),
+          AppRoutes.profileRouteName:                (_) => const ProfileScreen(),
+          AppRoutes.signupRouteName:                 (_) => const SignupScreen(),
+          AppRoutes.verifyEmailRouteName:            (_) => const VerifyEmailScreen(),
+          AppRoutes.leaderboardCompetitionsRouteName:(_) => const LeaderboardCompetitionsScreen(),
+          AppRoutes.masterYourLessonsRouteName:      (_) => const MasterLessonsScreen(),
+          AppRoutes.understandYourLessonsRouteName:  (_) => const UnderstandLessonsScreen(),
+          AppRoutes.blockDistractionsRouteName:      (_) => const BlockDistractionsScreen(),
+        },
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeProvider.appTheme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale(languageProvider.appLanguage),
+      ),
     );
   }
 }
