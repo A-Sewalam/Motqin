@@ -11,6 +11,33 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgColor,
+      appBar: AppBar(backgroundColor: 
+      AppColors.bgColor,),
+      drawer: SizedBox(
+        width: 200,
+        child: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            // DrawerHeader(
+            //   decoration: BoxDecoration(color: Color(0xFF2563EB)),
+            //   child: Text('القائمة', style: TextStyle(color: Colors.white)),
+              
+            // ),
+            SizedBox(height: 30,),
+            ListTile(
+              leading: Icon(Icons.account_circle_outlined, color: Color(0xFF2563EB), 
+              size: 40,),
+              title: Text('حسابى',style: TextStyle(fontSize: 20),),
+              onTap: () {
+                Navigator.of(context).pushNamed(AppRoutes.profileRouteName);
+              },
+            ),
+            // Add more ListTiles for other routes
+          ],
+        ),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -19,21 +46,21 @@ class HomeScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 12),
               // ── Top Row: profile icon ──────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed(AppRoutes.profileRouteName);
-                    },
-                    child: const Icon(
-                      Icons.account_circle_outlined,
-                      color: Color(0xFF2563EB),
-                      size: 48,
-                    ),
-                  ),
-                ],
-              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   children: [
+              //     GestureDetector(
+              //       onTap: () {
+              //         Scaffold.of(context).openDrawer();
+              //       },
+              //       child: const Icon(
+              //         Icons.account_circle_outlined,
+              //         color: Color(0xFF2563EB),
+              //         size: 48,
+              //       ),
+              //     ),
+              //   ],
+              // ),
 
               const SizedBox(height: 12),
 
