@@ -131,7 +131,7 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
     try {
       final endTime = _selectedOption == 2 && _selectedDateTime != null
           ? _selectedDateTime!
-          : DateTime.now().add(const Duration(days: 365));
+          : DateTime.now().add(const Duration(seconds: 5));
 
       await _blockService.startBlock(
         mode: _selectedOption == 1
