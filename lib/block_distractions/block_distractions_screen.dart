@@ -3,7 +3,6 @@ import 'package:motqin/utils/app_colors.dart';
 import 'restrict_app_usage_widget.dart';
 import 'block_options_widget.dart';
 import 'admin_settings_widget.dart';
-import 'study_timer_widget.dart';
 import 'timed_block_service.dart';
 
 class BlockDistractionsScreen extends StatefulWidget {
@@ -16,23 +15,22 @@ class BlockDistractionsScreen extends StatefulWidget {
 class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   bool _allBlocked = false;
 
-
-@override
-void initState() {
+  @override
+  void initState() {
     super.initState();
     _checkAccessibilityPermission();
   }
 
-    void _onToggleBlock(bool blocked) {
+  void _onToggleBlock(bool blocked) {
     setState(() => _allBlocked = blocked);
   }
-  Future<void> _checkAccessibilityPermission() async {
-  final service = TimedBlockService();
 
-  if (!await service.isPermissionGranted()) {
-    await service.requestPermission();
+  Future<void> _checkAccessibilityPermission() async {
+    final service = TimedBlockService();
+    if (!await service.isPermissionGranted()) {
+      await service.requestPermission();
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -63,8 +61,6 @@ void initState() {
               BlockOptionsWidget(onToggleBlock: _onToggleBlock),
               const SizedBox(height: 20),
               const AdminSettingsWidget(),
-              const SizedBox(height: 20),
-              const StudyTimerWidget(),
               const SizedBox(height: 24),
             ],
           ),
