@@ -33,6 +33,14 @@
             android:taskAffinity=""
             android:exported="false" />
 
+        <!-- Allowed-apps quick launcher, opened from the block screen -->
+        <activity
+            android:name=".AllowedAppsActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:exported="false" />
+
         <!-- Accessibility service -->
         <service
             android:name=".AppBlockerService"
@@ -71,6 +79,10 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
         </intent>
     </queries>
 </manifest>

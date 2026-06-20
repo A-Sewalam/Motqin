@@ -4,12 +4,19 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.provider.Settings
 import android.text.TextUtils
+import android.util.Base64
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.ByteArrayOutputStream
 
 class MainActivity : FlutterActivity() {
 
@@ -52,12 +59,23 @@ class MainActivity : FlutterActivity() {
                             result.error("INVALID_ARGS", "packages list is required", null)
                             return@setMethodCallHandler
                         }
+                        // endTime is optional for backward compatibility, but required
+                        // for the countdown screen to know when to stop.
+                        val endTime = call.argument<Long>("endTime") ?: 0L
+
                         AppBlockerService.setBlockActive(
                             applicationContext,
                             active = true,
-                            packages = packages.toSet()
+                            packages = packages.toSet(),
+                            endTimeMillis = endTime
                         )
-                        Log.d(TAG, "✅ Block activated with packages: $packages")
+                        Log.d(TAG, "✅ Block activated with packages: $packages, endTime=$endTime")
+
+                        // Show the block/countdown screen immediately.
+                        startActivity(Intent(this, BlockedAppActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })
+
                         result.success(null)
                     }
 
@@ -100,9 +118,64 @@ class MainActivity : FlutterActivity() {
                         result.success(null)
                     }
 
+                    "getInstalledApps" -> {
+                        Thread {
+                            try {
+                                val apps = getInstalledUserApps()
+                                runOnUiThread { result.success(apps) }
+                            } catch (e: Exception) {
+                                runOnUiThread {
+                                    result.error("GET_APPS_FAILED", e.message, null)
+                                }
+                            }
+                        }.start()
+                    }
+
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    private fun getInstalledUserApps(): List<Map<String, String>> {
+        val pm = packageManager
+        val launchIntent = Intent(Intent.ACTION_MAIN, null).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+        val resolved = pm.queryIntentActivities(launchIntent, 0)
+
+        return resolved
+            .asSequence()
+            .map { it.activityInfo }
+            .filter { it.packageName != packageName }           // hide Motqin itself
+            .filter { it.packageName != "com.android.launcher3" }
+            .distinctBy { it.packageName }
+            .sortedBy { it.loadLabel(pm).toString().lowercase() }
+            .map { info ->
+                val icon = try { drawableToBase64(info.loadIcon(pm)) } catch (_: Exception) { "" }
+                mapOf(
+                    "name"        to info.loadLabel(pm).toString(),
+                    "packageName" to info.packageName,
+                    "icon"        to icon,
+                )
+            }
+            .toList()
+    }
+
+    private fun drawableToBase64(drawable: Drawable): String {
+        val bitmap = if (drawable is BitmapDrawable && drawable.bitmap != null) {
+            drawable.bitmap
+        } else {
+            val w = drawable.intrinsicWidth.takeIf { it > 0 } ?: 48
+            val h = drawable.intrinsicHeight.takeIf { it > 0 } ?: 48
+            val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bmp)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+            bmp
+        }
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 85, stream)
+        return Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
     }
 
     private fun requestDeviceAdmin() {

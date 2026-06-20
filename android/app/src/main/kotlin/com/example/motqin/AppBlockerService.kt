@@ -13,14 +13,33 @@ class AppBlockerService : AccessibilityService() {
         private const val PREFS_NAME = "app_blocker_prefs"
         private const val KEY_IS_ACTIVE = "is_block_active"
         private const val KEY_PACKAGES = "blocked_packages"
+        private const val KEY_END_TIME = "block_end_time_millis"
 
-        fun setBlockActive(context: Context, active: Boolean, packages: Set<String> = emptySet()) {
-            Log.d(TAG, "setBlockActive called: active=$active, packages=$packages")
+        /** Broadcast fired whenever the block is turned on/off, so any open
+         *  BlockedAppActivity can react immediately (e.g. dismiss itself). */
+        const val ACTION_BLOCK_STATE_CHANGED = "com.example.motqin.BLOCK_STATE_CHANGED"
+        const val EXTRA_ACTIVE = "active"
+
+        fun setBlockActive(
+            context: Context,
+            active: Boolean,
+            packages: Set<String> = emptySet(),
+            endTimeMillis: Long = 0L
+        ) {
+            Log.d(TAG, "setBlockActive called: active=$active, packages=$packages, endTime=$endTimeMillis")
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().apply {
                 putBoolean(KEY_IS_ACTIVE, active)
                 putStringSet(KEY_PACKAGES, packages)
+                putLong(KEY_END_TIME, if (active) endTimeMillis else 0L)
                 apply()
             }
+
+            // Let any visible BlockedAppActivity know right away (e.g. admin cancelled,
+            // or the timer expired on the Flutter side).
+            context.sendBroadcast(Intent(ACTION_BLOCK_STATE_CHANGED).apply {
+                putExtra(EXTRA_ACTIVE, active)
+                setPackage(context.packageName)
+            })
         }
 
         fun isBlockActive(context: Context): Boolean {
@@ -31,6 +50,12 @@ class AppBlockerService : AccessibilityService() {
         fun getBlockedPackages(context: Context): Set<String> {
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .getStringSet(KEY_PACKAGES, emptySet()) ?: emptySet()
+        }
+
+        /** Epoch millis when the active block ends, or 0L if no block is active. */
+        fun getBlockEndTimeMillis(context: Context): Long {
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getLong(KEY_END_TIME, 0L)
         }
     }
 
@@ -45,7 +70,6 @@ class AppBlockerService : AccessibilityService() {
         val isActive = isBlockActive(applicationContext)
         val blocked = getBlockedPackages(applicationContext)
 
-        // Log every foreground app change so we can see what's happening
         Log.d(TAG, "Window changed → pkg=$pkg | blockActive=$isActive | blockedList=$blocked")
 
         if (!isActive) return
