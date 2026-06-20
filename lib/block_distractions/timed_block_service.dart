@@ -122,7 +122,7 @@ class TimedBlockService extends ChangeNotifier {
     if (_status == BlockStatus.active) throw StateError('Already active.');
     if (endTime.isBefore(DateTime.now())) throw ArgumentError('endTime must be future.');
 
-    await _native.startBlock(packages: customPackages);
+    await _native.startBlock(packages: customPackages, endTime: endTime);
 
     _session = BlockSession(
         startTime: DateTime.now(), endTime: endTime, mode: mode);
