@@ -104,7 +104,7 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
     try {
       final endTime = _selectedOption == 2 && _selectedDateTime != null
           ? _selectedDateTime!
-          : DateTime.now().add(const Duration(seconds: 5));
+          : DateTime.now().add(const Duration(days: 365));
 
       await _blockService.startBlock(
         mode: _selectedOption == 1
@@ -112,12 +112,6 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
             : BlockMode.untilDateTime,
         endTime: endTime,
       );
-
-      // 3. Request Device Admin after block starts (only if not already active)
-      final adminActive = await _blockService.isDeviceAdminActive();
-      if (!adminActive) {
-        await _blockService.requestDeviceAdmin();
-      }
 
       final session = _blockService.session!;
       _showDialog(

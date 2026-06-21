@@ -22,7 +22,8 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   bool _permissionChecked = false;
   bool _permissionGranted = false;
 
-  static const _kPermAsked = 'accessibility_permission_asked';
+  static const _kPermAsked        = 'accessibility_permission_asked';
+  static const _kDeviceAdminAsked = 'device_admin_asked';
 
   @override
   void initState() {
@@ -43,7 +44,8 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
     final granted = await service.isPermissionGranted();
 
     if (granted) {
-      // Already enabled — nothing to do
+      // Accessibility granted — also request Device Admin once if not yet asked
+      await _checkDeviceAdminOnce();
       if (mounted) setState(() { _permissionGranted = true; _permissionChecked = true; });
       return;
     }
@@ -101,11 +103,73 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 await TimedBlockService().requestPermission();
-                // Re-check after user comes back
-                if (mounted) _recheckPermission();
+                if (mounted) {
+                  await _checkDeviceAdminOnce();
+                  _recheckPermission();
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('تفعيل', style: TextStyle(fontSize: 14)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _checkDeviceAdminOnce() async {
+    final service = TimedBlockService();
+    final alreadyActive = await service.isDeviceAdminActive();
+    if (alreadyActive) return; // already granted, nothing to do
+
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyAsked = prefs.getBool(_kDeviceAdminAsked) ?? false;
+    if (alreadyAsked) return; // asked before, don't ask again
+
+    await prefs.setBool(_kDeviceAdminAsked, true);
+
+    // Small delay so the accessibility settings screen closes first
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.admin_panel_settings_outlined,
+                  color: Color(0xFF7C3AED), size: 24),
+              SizedBox(width: 10),
+              Text('حماية التطبيق',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: const Text(
+            'لمنع حذف التطبيق أثناء جلسة الحجب، نحتاج إذن مشرف الجهاز.\n\nهذا يضمن التزامك بوقت الدراسة.',
+            style: TextStyle(fontSize: 14, height: 1.6),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('تخطي',
+                  style: TextStyle(color: Colors.grey, fontSize: 14)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await TimedBlockService().requestDeviceAdmin();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7C3AED),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
