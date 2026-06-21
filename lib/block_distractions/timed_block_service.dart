@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_block_channel.dart';
+import 'block_prefs_keys.dart';
 
 enum BlockStatus { inactive, active, expired }
 
@@ -47,10 +48,10 @@ class TimedBlockService extends ChangeNotifier {
   factory TimedBlockService() => _instance;
   TimedBlockService._internal();
 
-  static const _kStartTime = 'block_start_time';
-  static const _kEndTime   = 'block_end_time';
-  static const _kMode      = 'block_mode';
-  static const _kIsActive  = 'block_is_active';
+  static const _kStartTime = BlockPrefsKeys.blockStartTime;
+  static const _kEndTime   = BlockPrefsKeys.blockEndTime;
+  static const _kMode      = BlockPrefsKeys.blockMode;
+  static const _kIsActive  = BlockPrefsKeys.blockIsActive;
 
   final AppBlockChannel _native = AppBlockChannel();
 

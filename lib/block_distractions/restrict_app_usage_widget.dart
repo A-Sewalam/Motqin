@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_block_channel.dart';
 import 'timed_block_service.dart';
+import 'block_prefs_keys.dart';
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 //
@@ -32,7 +33,7 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
   final TimedBlockService _blockService = TimedBlockService();
   final AppBlockChannel _channel = AppBlockChannel();
 
-  static const _kPrefsKey = 'allowed_packages_during_block';
+  static const _kPrefsKey = BlockPrefsKeys.allowedPackages;
 
   List<InstalledApp> _allApps = [];
   bool _loadingApps = false;

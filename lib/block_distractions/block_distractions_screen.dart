@@ -6,6 +6,7 @@ import 'restrict_app_usage_widget.dart';
 import 'block_options_widget.dart';
 import 'admin_settings_widget.dart';
 import 'timed_block_service.dart';
+import 'block_prefs_keys.dart';
 
 class BlockDistractionsScreen extends StatefulWidget {
   const BlockDistractionsScreen({super.key});
@@ -23,9 +24,9 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   bool _permissionChecked = false;
   bool _permissionGranted = false;
 
-  static const _kPermAsked        = 'accessibility_permission_asked';
-  static const _kDeviceAdminAsked = 'device_admin_asked';
-  static const _kOverlayAsked     = 'overlay_permission_asked';
+  static const _kPermAsked        = BlockPrefsKeys.accessibilityAsked;
+  static const _kDeviceAdminAsked = BlockPrefsKeys.deviceAdminAsked;
+  static const _kOverlayAsked     = BlockPrefsKeys.overlayAsked;
 
   @override
   void initState() {
