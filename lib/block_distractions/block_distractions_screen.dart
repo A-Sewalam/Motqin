@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motqin/utils/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'restrict_app_usage_widget.dart';
 import 'block_options_widget.dart';
 import 'admin_settings_widget.dart';
@@ -15,31 +16,114 @@ class BlockDistractionsScreen extends StatefulWidget {
 
 class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   bool _allBlocked = false;
-
-  /// Kept in sync by RestrictAppUsageWidget via onPackagesChanged.
-  /// Passed down to BlockOptionsWidget so startBlock uses the right list.
   Set<String> _selectedPackages = {};
+
+  // Permission state
+  bool _permissionChecked = false;
+  bool _permissionGranted = false;
+
+  static const _kPermAsked = 'accessibility_permission_asked';
 
   @override
   void initState() {
     super.initState();
-    _checkAccessibilityPermission();
+    _checkPermissionOnce();
   }
 
-  void _onToggleBlock(bool blocked) {
-    setState(() => _allBlocked = blocked);
-  }
+  void _onToggleBlock(bool blocked) =>
+      setState(() => _allBlocked = blocked);
 
-  void _onPackagesChanged(Set<String> packages) {
-    setState(() => _selectedPackages = packages);
-  }
+  void _onPackagesChanged(Set<String> packages) =>
+      setState(() => _selectedPackages = packages);
 
-  Future<void> _checkAccessibilityPermission() async {
+  // ── Permission logic ────────────────────────────────────────────────
+
+  Future<void> _checkPermissionOnce() async {
     final service = TimedBlockService();
-    if (!await service.isPermissionGranted()) {
-      await service.requestPermission();
+    final granted = await service.isPermissionGranted();
+
+    if (granted) {
+      // Already enabled — nothing to do
+      if (mounted) setState(() { _permissionGranted = true; _permissionChecked = true; });
+      return;
     }
+
+    // Check if we've already asked before
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyAsked = prefs.getBool(_kPermAsked) ?? false;
+
+    if (!alreadyAsked) {
+      // First time: show dialog after the frame renders
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showPermissionDialog();
+      });
+    }
+
+    if (mounted) setState(() { _permissionGranted = false; _permissionChecked = true; });
   }
+
+  Future<void> _showPermissionDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kPermAsked, true);
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.security_outlined, color: Color(0xFF2563EB), size: 24),
+              SizedBox(width: 10),
+              Text(
+                'إذن الوصول للتطبيقات',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: const Text(
+            'تحتاج هذه الميزة إلى تفعيل خدمة إمكانية الوصول حتى تتمكن من حجب التطبيقات أثناء الدراسة.\n\nاضغط "تفعيل" ثم ابحث عن "Motqin" وفعّل الخدمة.',
+            style: TextStyle(fontSize: 14, height: 1.6),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'لاحقاً',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await TimedBlockService().requestPermission();
+                // Re-check after user comes back
+                if (mounted) _recheckPermission();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('تفعيل', style: TextStyle(fontSize: 14)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _recheckPermission() async {
+    final granted = await TimedBlockService().isPermissionGranted();
+    if (mounted) setState(() => _permissionGranted = granted);
+  }
+
+  // ── Build ────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -60,26 +144,87 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RestrictAppUsageWidget(
-                allBlocked: _allBlocked,
-                onPackagesChanged: _onPackagesChanged,
+        body: !_permissionChecked
+            // Still checking — show neutral loader, no red error
+            ? const Center(
+                child: CircularProgressIndicator(color: Color(0xFF2563EB)),
+              )
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Permission banner — only shown if not yet granted
+                    if (!_permissionGranted) ...[
+                      _PermissionBanner(onTap: () async {
+                        await TimedBlockService().requestPermission();
+                        _recheckPermission();
+                      }),
+                      const SizedBox(height: 20),
+                    ],
+                    RestrictAppUsageWidget(
+                      allBlocked: _allBlocked,
+                      onPackagesChanged: _onPackagesChanged,
+                    ),
+                    const SizedBox(height: 20),
+                    BlockOptionsWidget(
+                      onToggleBlock: _onToggleBlock,
+                      customPackages: _selectedPackages,
+                    ),
+                    const SizedBox(height: 20),
+                    const AdminSettingsWidget(),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              BlockOptionsWidget(
-                onToggleBlock: _onToggleBlock,
-                customPackages: _selectedPackages,
-              ),
-              const SizedBox(height: 20),
-              const AdminSettingsWidget(),
-              const SizedBox(height: 24),
-            ],
+      ),
+    );
+  }
+}
+
+// ── Permission banner ─────────────────────────────────────────────────────────
+
+class _PermissionBanner extends StatelessWidget {
+  final VoidCallback onTap;
+  const _PermissionBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFED7AA), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded,
+              color: Color(0xFFEA580C), size: 24),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'يجب تفعيل خدمة إمكانية الوصول لحجب التطبيقات',
+              style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFFEA580C),
+                  height: 1.5),
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: onTap,
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFEA580C),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('تفعيل', style: TextStyle(fontSize: 13)),
+          ),
+        ],
       ),
     );
   }

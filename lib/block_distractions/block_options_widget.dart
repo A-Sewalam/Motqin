@@ -4,15 +4,7 @@ import 'timed_block_service.dart';
 class BlockOptionsWidget extends StatefulWidget {
   final void Function(bool blocked) onToggleBlock;
 
-  /// The packages the user selected in RestrictAppUsageWidget.
-  /// When non-empty, only these are blocked instead of the default list.
-  final Set<String> customPackages;
-
-  const BlockOptionsWidget({
-    super.key,
-    required this.onToggleBlock,
-    this.customPackages = const {},
-  });
+  const BlockOptionsWidget({super.key, required this.onToggleBlock, required Set<String> customPackages});
 
   @override
   State<BlockOptionsWidget> createState() => _BlockOptionsWidgetState();
@@ -61,42 +53,6 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
     }
   }
 
-  // ── Permission dialog — shown when pressing activate and accessibility not enabled
-  void _showPermissionDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('إذن مطلوب',
-            textDirection: TextDirection.rtl,
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text(
-          'لحجب التطبيقات يجب تفعيل خدمة إمكانية الوصول لتطبيق موتقن.\n\nاضغط "فتح الإعدادات" ثم فعّل موتقن.',
-          textDirection: TextDirection.rtl,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child:
-                const Text('إلغاء', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB)),
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _blockService.requestPermission();
-            },
-            child: const Text('فتح الإعدادات',
-                style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _pickDateTime() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -128,10 +84,19 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
   }
 
   Future<void> _onActivatePressed() async {
-    // 1. Check accessibility permission first
+    // 1. Check accessibility permission — banner in block_distractions_screen handles the dialog
     final granted = await _blockService.isPermissionGranted();
     if (!granted) {
-      _showPermissionDialog();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'يرجى تفعيل خدمة إمكانية الوصول أولاً من الشريط الأعلى',
+            textDirection: TextDirection.rtl,
+          ),
+          backgroundColor: Color(0xFFEA580C),
+        ),
+      );
       return;
     }
 
@@ -140,13 +105,6 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
       final endTime = _selectedOption == 2 && _selectedDateTime != null
           ? _selectedDateTime!
           : DateTime.now().add(const Duration(seconds: 5));
-
-      // Use user-selected packages if any, otherwise fall back to defaults
-      if (widget.customPackages.isNotEmpty) {
-        _blockService.customPackages = widget.customPackages.toList();
-      } else {
-        _blockService.customPackages = null;
-      }
 
       await _blockService.startBlock(
         mode: _selectedOption == 1
