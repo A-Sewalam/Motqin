@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:motqin/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'restrict_app_usage_widget.dart';
@@ -24,6 +25,7 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
 
   static const _kPermAsked        = 'accessibility_permission_asked';
   static const _kDeviceAdminAsked = 'device_admin_asked';
+  static const _kOverlayAsked     = 'overlay_permission_asked';
 
   @override
   void initState() {
@@ -44,8 +46,9 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
     final granted = await service.isPermissionGranted();
 
     if (granted) {
-      // Accessibility granted — also request Device Admin once if not yet asked
+      // Accessibility granted — also request Device Admin + overlay once if not yet asked
       await _checkDeviceAdminOnce();
+      await _checkOverlayPermissionOnce();
       if (mounted) setState(() { _permissionGranted = true; _permissionChecked = true; });
       return;
     }
@@ -105,6 +108,7 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
                 await TimedBlockService().requestPermission();
                 if (mounted) {
                   await _checkDeviceAdminOnce();
+                  await _checkOverlayPermissionOnce();
                   _recheckPermission();
                 }
               },
@@ -170,6 +174,62 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF7C3AED),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('تفعيل', style: TextStyle(fontSize: 14)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _checkOverlayPermissionOnce() async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyAsked = prefs.getBool(_kOverlayAsked) ?? false;
+    if (alreadyAsked) return;
+
+    const channel = MethodChannel('com.example.motqin/app_blocker');
+    final granted = await channel.invokeMethod<bool>('isOverlayPermissionGranted') ?? true;
+    if (granted) return;
+
+    await prefs.setBool(_kOverlayAsked, true);
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.layers_outlined, color: Color(0xFFEA580C), size: 24),
+              SizedBox(width: 10),
+              Text('إذن العرض فوق التطبيقات',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: const Text(
+            'لكي تظهر شاشة الحجب فوق التطبيقات الأخرى، نحتاج إذن "العرض فوق التطبيقات".\n\nاضغط تفعيل ثم فعّل الإذن لتطبيق Motqin.',
+            style: TextStyle(fontSize: 14, height: 1.6),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('تخطي',
+                  style: TextStyle(color: Colors.grey, fontSize: 14)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await channel.invokeMethod('requestOverlayPermission');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEA580C),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),

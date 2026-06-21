@@ -9,6 +9,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Base64
@@ -134,6 +136,26 @@ class MainActivity : FlutterActivity() {
                                 }
                             }
                         }.start()
+                    }
+
+                    "isOverlayPermissionGranted" -> {
+                        val granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            Settings.canDrawOverlays(this)
+                        } else {
+                            true // below API 23 it's granted by default
+                        }
+                        result.success(granted)
+                    }
+
+                    "requestOverlayPermission" -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            val intent = android.content.Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:$packageName")
+                            )
+                            startActivity(intent)
+                        }
+                        result.success(null)
                     }
 
                     else -> result.notImplemented()
