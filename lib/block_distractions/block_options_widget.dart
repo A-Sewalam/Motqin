@@ -139,7 +139,7 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
     try {
       final endTime = _selectedOption == 2 && _selectedDateTime != null
           ? _selectedDateTime!
-          : DateTime.now().add(const Duration(days: 365));
+          : DateTime.now().add(const Duration(seconds: 5));
 
       // Use user-selected packages if any, otherwise fall back to defaults
       if (widget.customPackages.isNotEmpty) {
