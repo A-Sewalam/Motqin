@@ -21,6 +21,7 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   Set<String> _selectedPackages = {};
 
   bool _permissionChecked = false;
+  bool _permissionsSheetOpen = false;
   bool _accessibilityGranted = false;
   bool _deviceAdminGranted = false;
   bool _overlayGranted = false;
@@ -74,17 +75,25 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
   void _onToggleBlock(bool blocked) =>
       setState(() => _allBlocked = blocked);
 
-  void _onPackagesChanged(Set<String> packages) =>
-      setState(() => _selectedPackages = packages);
+  void _onPackagesChanged(Set<String> packages) {
+    // Defer setState to post-frame to avoid "setState called during build"
+    // which happens when RestrictAppUsageWidget fires this from didUpdateWidget.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _selectedPackages = packages);
+    });
+  }
 
   // ── Single permissions bottom sheet ──────────────────────────────────
 
   Future<void> _showPermissionsSheet() async {
+    // Guard: prevent duplicate GlobalKey if already open
+    if (_permissionsSheetOpen) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kOnboardingShown, true);
 
     if (!mounted) return;
 
+    setState(() => _permissionsSheetOpen = true);
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -96,11 +105,17 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
         deviceAdminGranted: _deviceAdminGranted,
         overlayGranted: _overlayGranted,
         onRequestAccessibility: () async {
+          // Always open accessibility settings (grant or disable from there)
           await TimedBlockService().requestPermission();
           await _refreshPermissions();
         },
         onRequestDeviceAdmin: () async {
-          await TimedBlockService().requestDeviceAdmin();
+          if (_deviceAdminGranted) {
+            // Already granted — open device admin settings so user can revoke
+            await _channel.invokeMethod('openDeviceAdminSettings');
+          } else {
+            await TimedBlockService().requestDeviceAdmin();
+          }
           await _refreshPermissions();
         },
         onRequestOverlay: () async {
@@ -111,6 +126,7 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
       ),
     );
 
+    if (mounted) setState(() => _permissionsSheetOpen = false);
     // Re-check after sheet closes
     await _refreshPermissions();
   }
@@ -313,8 +329,9 @@ class _PermissionsSheetState extends State<_PermissionsSheet> {
               subtitle: 'ضرورية لمراقبة التطبيقات وحجبها',
               granted: _accessibilityGranted,
               onToggle: () async {
+                // Opens settings and returns immediately (before user grants).
+                // Do NOT call _refresh() here — use the "تحديث" button after granting.
                 await widget.onRequestAccessibility();
-                await _refresh();
               },
             ),
             const Divider(height: 24),
@@ -326,7 +343,6 @@ class _PermissionsSheetState extends State<_PermissionsSheet> {
               granted: _deviceAdminGranted,
               onToggle: () async {
                 await widget.onRequestDeviceAdmin();
-                await _refresh();
               },
             ),
             const Divider(height: 24),
@@ -338,7 +354,6 @@ class _PermissionsSheetState extends State<_PermissionsSheet> {
               granted: _overlayGranted,
               onToggle: () async {
                 await widget.onRequestOverlay();
-                await _refresh();
               },
             ),
             const SizedBox(height: 24),
@@ -444,9 +459,9 @@ class _PermissionRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        // Toggle button
+        // Toggle button — always tappable to open settings
         GestureDetector(
-          onTap: granted ? null : onToggle,
+          onTap: onToggle,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             width: 64,
@@ -462,8 +477,8 @@ class _PermissionRow extends StatelessWidget {
                 AnimatedAlign(
                   duration: const Duration(milliseconds: 250),
                   alignment: granted
-                      ? Alignment.centerLeft
-                      : Alignment.centerRight,
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
                   child: Padding(
                     padding: const EdgeInsets.all(4),
                     child: Container(

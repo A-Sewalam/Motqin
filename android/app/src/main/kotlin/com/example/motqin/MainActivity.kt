@@ -77,12 +77,6 @@ class MainActivity : FlutterActivity() {
                             endTimeMillis = endTime
                         )
                         Log.d(TAG, "✅ Block activated with packages: $packages, endTime=$endTime")
-
-                        // Show the block/countdown screen immediately.
-                        startActivity(Intent(this, BlockedAppActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        })
-
                         result.success(null)
                     }
 
@@ -136,6 +130,15 @@ class MainActivity : FlutterActivity() {
                                 }
                             }
                         }.start()
+                    }
+
+                    "openDeviceAdminSettings" -> {
+                        startActivity(
+                            Intent(Settings.ACTION_SECURITY_SETTINGS).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                        )
+                        result.success(null)
                     }
 
                     "isOverlayPermissionGranted" -> {

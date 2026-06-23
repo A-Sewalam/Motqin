@@ -244,6 +244,9 @@ class BlockedAppActivity : Activity() {
 
             override fun onFinish() {
                 timeText.text = "00:00:00"
+                // Bug 6: clear native block state so the Dart TimedBlockService
+                // syncs correctly on next open, instead of racing with the Dart timer.
+                AppBlockerService.setBlockActive(applicationContext, active = false)
                 finishAndGoHome()
             }
         }.start()

@@ -40,11 +40,18 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
 
   /// Packages the user explicitly marked as ALLOWED (not blocked).
   final Set<String> _allowedPackages = {};
+  bool _pickerOpen = false;
+
+  /// Bug 7: track previous service status so we can detect the
+  /// active → expired/inactive transition directly, without relying
+  /// on the fragile allBlocked prop from the parent.
+  BlockStatus _lastBlockStatus = BlockStatus.inactive;
 
   @override
   void initState() {
     super.initState();
     _blockService.addListener(_onBlockStateChanged);
+    _lastBlockStatus = _blockService.status;
     _loadPersistedPackages().then((_) => _loadApps());
   }
 
@@ -61,7 +68,9 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
     final stored = prefs.getStringList(_kPrefsKey);
     if (stored != null && mounted) {
       setState(() => _allowedPackages.addAll(stored));
-      _notifyBlockedPackages();
+      // Bug 3: do NOT call _notifyBlockedPackages() here — _allApps is still
+      // empty so _packagesToBlock would be an empty set.
+      // _loadApps() (called right after) will call it once apps are known.
     }
   }
 
@@ -97,26 +106,41 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
   }
 
   void _onBlockStateChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    final current = _blockService.status;
+    // Bug 7: when the block transitions from active → expired/inactive,
+    // reload the allowed list from prefs directly here — no longer depends
+    // on the parent toggling allBlocked via onToggleBlock.
+    if (_lastBlockStatus == BlockStatus.active &&
+        current != BlockStatus.active) {
+      _loadPersistedPackages();
+    }
+    _lastBlockStatus = current;
+    setState(() {});
   }
 
   @override
   void didUpdateWidget(RestrictAppUsageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.allBlocked && !oldWidget.allBlocked) {
-      // "Block all" — clear allowed list so everything is blocked
+      // "Block all" triggered from parent UI — clear the allowed list.
       setState(() => _allowedPackages.clear());
       _persistPackages();
-      _notifyBlockedPackages();
-    } else if (!widget.allBlocked && oldWidget.allBlocked) {
-      // Restore — reload persisted allowed list
-      _loadPersistedPackages();
+      // Defer callback to after current build pass to avoid
+      // setState() called during build error.
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _notifyBlockedPackages());
     }
+    // Bug 7 fix: the restore-on-expiry path is now handled by
+    // _onBlockStateChanged listening to TimedBlockService directly,
+    // so we no longer need the fragile "else if (!allBlocked)" branch.
   }
 
-  void _openAppPicker() {
-    if (_allApps.isEmpty) return;
-    showModalBottomSheet(
+  Future<void> _openAppPicker() async {
+    // Guard: prevent duplicate GlobalKey if user taps twice quickly
+    if (_allApps.isEmpty || _pickerOpen) return;
+    setState(() => _pickerOpen = true);
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -132,6 +156,7 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
         },
       ),
     );
+    if (mounted) setState(() => _pickerOpen = false);
   }
 
   @override

@@ -3,8 +3,13 @@ import 'timed_block_service.dart';
 
 class BlockOptionsWidget extends StatefulWidget {
   final void Function(bool blocked) onToggleBlock;
+  final Set<String> customPackages;
 
-  const BlockOptionsWidget({super.key, required this.onToggleBlock, required Set<String> customPackages});
+  const BlockOptionsWidget({
+    super.key,
+    required this.onToggleBlock,
+    required this.customPackages,
+  });
 
   @override
   State<BlockOptionsWidget> createState() => _BlockOptionsWidgetState();
@@ -15,6 +20,7 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
   DateTime? _selectedDateTime;
 
   final TimedBlockService _blockService = TimedBlockService();
+  late final TextEditingController _dateController;
 
   bool get _canActivate {
     if (_blockService.isActive) return false;
@@ -26,16 +32,24 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
   @override
   void initState() {
     super.initState();
+    _dateController = TextEditingController();
     _blockService.addListener(_onServiceUpdate);
     // Restore session from SharedPreferences if one was active
     _blockService.init().then((_) {
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      // Bug 4: if a session existed but expired while the app was closed,
+      // the ticker won't have fired — force expiry now.
+      if (_blockService.session?.isExpired == true) {
+        _blockService.onStudyPlanCompleted();
+      }
+      setState(() {});
       widget.onToggleBlock(_blockService.isActive);
     });
   }
 
   @override
   void dispose() {
+    _dateController.dispose();
     _blockService.removeListener(_onServiceUpdate);
     super.dispose();
   }
@@ -81,6 +95,7 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
       return;
     }
     setState(() => _selectedDateTime = chosen);
+    _dateController.text = '${chosen.day}/${chosen.month}/${chosen.year}  ${chosen.hour}:${chosen.minute.toString().padLeft(2, '0')}';
   }
 
   Future<void> _onActivatePressed() async {
@@ -100,11 +115,17 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
       return;
     }
 
-    // 2. Start block
+    // 2. Start block — wire the user's package selection first.
     try {
       final endTime = _selectedOption == 2 && _selectedDateTime != null
           ? _selectedDateTime!
-          : DateTime.now().add(const Duration(days: 365));
+          : DateTime.now().add(const Duration(seconds: 5));
+
+      // Empty set means "block everything" → pass null so the service falls
+      // back to the default kDefaultBlockedPackages list.
+      _blockService.customPackages = widget.customPackages.isEmpty
+          ? null
+          : widget.customPackages.toList();
 
       await _blockService.startBlock(
         mode: _selectedOption == 1
@@ -234,14 +255,8 @@ class _BlockOptionsWidgetState extends State<BlockOptionsWidget> {
                 ),
                 readOnly: true,
                 onTap: _pickDateTime,
-                controller: TextEditingController(
-                  text: _selectedDateTime != null
-                      ? '${_selectedDateTime!.day}/${_selectedDateTime!.month}/${_selectedDateTime!.year}'
-                          '  ${_selectedDateTime!.hour}:${_selectedDateTime!.minute.toString().padLeft(2, '0')}'
-                      : '',
-                ),
-              ),
-            ],
+                controller: _dateController,
+      )],
             const SizedBox(height: 16),
             SizedBox(
               width: 220,
