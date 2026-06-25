@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Motqin.Models.Session;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,10 +18,12 @@ namespace Motqin.Models
 
         public DateTime NextReviewDate { get; set; }
         public int ReviewInterval { get; set; }
-        public int RepetitionNumber { get; set; }
+        public int RepetitionNumber => SpacedRepetitionSession.RepetitionNumber + 1;
 
         [StringLength(50)]
         public string Status { get; set; }
+
+        public int SpacedRepetitionSessionId { get; set; }
 
         // Navigation Properties
         [ForeignKey("UserID")]
@@ -28,5 +31,8 @@ namespace Motqin.Models
 
         [ForeignKey("LessonID")]
         public virtual Lesson Lesson { get; set; }
+
+        [ForeignKey("SpacedRepetitionSessionId")]
+        public virtual SpacedRepetitionSession SpacedRepetitionSession { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Motqin.Data;
 
@@ -11,9 +12,11 @@ using Motqin.Data;
 namespace Motqin.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605230437_Add spacedrepititionsession to studyplan")]
+    partial class Addspacedrepititionsessiontostudyplan
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -266,139 +269,6 @@ namespace Motqin.Migrations
                     b.ToTable("Lessons");
                 });
 
-            modelBuilder.Entity("Motqin.Models.Payment.Bundle", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DurationDays")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Bundles", (string)null);
-                });
-
-            modelBuilder.Entity("Motqin.Models.Payment.UserSubscription", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BundleId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("EndDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset>("StartDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BundleId");
-
-                    b.HasIndex("UserId", "Status");
-
-                    b.ToTable("UserSubscriptions", (string)null);
-                });
-
-            modelBuilder.Entity("Motqin.Models.Payment.Wallet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Wallets", (string)null);
-                });
-
-            modelBuilder.Entity("Motqin.Models.Payment.WalletTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentMethod")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PaymobTransactionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReferenceId")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("WalletId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WalletId");
-
-                    b.ToTable("WalletTransactions", (string)null);
-                });
-
             modelBuilder.Entity("Motqin.Models.QuestionDetails", b =>
                 {
                     b.Property<int>("DetailID")
@@ -613,9 +483,6 @@ namespace Motqin.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<byte>("EducationalStage")
                         .HasColumnType("tinyint");
 
@@ -625,11 +492,6 @@ namespace Motqin.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<byte>("GradeLevel")
                         .HasColumnType("tinyint");
@@ -975,47 +837,6 @@ namespace Motqin.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("Motqin.Models.Payment.UserSubscription", b =>
-                {
-                    b.HasOne("Motqin.Models.Payment.Bundle", "Bundle")
-                        .WithMany()
-                        .HasForeignKey("BundleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Motqin.Models.User", "User")
-                        .WithMany("Subscriptions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bundle");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Motqin.Models.Payment.Wallet", b =>
-                {
-                    b.HasOne("Motqin.Models.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("Motqin.Models.Payment.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Motqin.Models.Payment.WalletTransaction", b =>
-                {
-                    b.HasOne("Motqin.Models.Payment.Wallet", "Wallet")
-                        .WithMany("Transactions")
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Wallet");
-                });
-
             modelBuilder.Entity("Motqin.Models.QuestionDetails", b =>
                 {
                     b.HasOne("Question", "Question")
@@ -1186,11 +1007,6 @@ namespace Motqin.Migrations
                     b.Navigation("StudySessions");
                 });
 
-            modelBuilder.Entity("Motqin.Models.Payment.Wallet", b =>
-                {
-                    b.Navigation("Transactions");
-                });
-
             modelBuilder.Entity("Motqin.Models.Session.SpacedRepetitionSession", b =>
                 {
                     b.Navigation("QuestionDetails");
@@ -1210,11 +1026,6 @@ namespace Motqin.Migrations
                     b.Navigation("StudyPlans");
 
                     b.Navigation("StudySessions");
-
-                    b.Navigation("Subscriptions");
-
-                    b.Navigation("Wallet")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Motqin.Models.UserAddedQuestion", b =>

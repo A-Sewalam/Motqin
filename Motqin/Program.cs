@@ -20,6 +20,9 @@ namespace Motqin
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddHttpClient();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c => {
@@ -45,6 +48,8 @@ namespace Motqin
             builder.Services.AddScoped<Services.SubjectsService>();
             builder.Services.AddScoped<Services.QuestionsService>();
             builder.Services.AddScoped<Services.ISubjectsService, Services.SubjectsService>();
+            builder.Services.AddScoped<Services.IPlanService, Services.PlanService>();
+            builder.Services.AddScoped<Services.ISessionService, Services.SessionService>();
 
             //EmailService
             builder.Services.AddScoped<IEmailService, SendGridEmailService>();
@@ -73,9 +78,16 @@ namespace Motqin
             //Add Identity
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
+                // custom password rules
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredUniqueChars = 1;
+ 
                 options.SignIn.RequireConfirmedEmail = true;
-
-                // Email Confirmation
+                
                 options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
             }
             )

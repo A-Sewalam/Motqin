@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Motqin.Data;
 using Motqin.Data.Helpers;
 using Motqin.Dtos.Authentication;
+using Motqin.Dtos.Authentication.Motqin.Dtos.Authentication;
 using Motqin.Enums;
 using Motqin.Models;
 using Motqin.Services;
@@ -28,6 +29,7 @@ namespace Motqin.Controllers
         private readonly IConfiguration _configuration;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly IEmailService _emailService;
+        private readonly IHttpClientFactory _httpClientFactory;
 
 
         public AuthenticationController(UserManager<User> userManager,
@@ -35,7 +37,8 @@ namespace Motqin.Controllers
             AppDbContext context,
             IConfiguration configuration,
             TokenValidationParameters tokenValidationParameters,
-            IEmailService emailService)
+            IEmailService emailService,
+            IHttpClientFactory httpClientFactory)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -43,30 +46,58 @@ namespace Motqin.Controllers
             _configuration = configuration;
             _tokenValidationParameters = tokenValidationParameters;
             _emailService = emailService;
-
+            _httpClientFactory = httpClientFactory;
         }
 
-        [HttpPost("register-user")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest("Please, provide all the required fields");
+                var modelErrors = ModelState.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToList()
+                );
+                return BadRequest(new { Message = "Validation Failed", Errors = modelErrors });
             }
 
             var userExists = await _userManager.FindByEmailAsync(userRegisterDto.EmailAddress);
             if (userExists != null)
             {
-                return BadRequest($"User {userRegisterDto.EmailAddress} already exists");
+                if (!userExists.EmailConfirmed)
+                {
+                    return BadRequest(new
+                    {
+                        Message = "Registration Failed",
+                        Code = "UnconfirmedAccount", 
+                        Errors = new Dictionary<string, List<string>>
+            {
+                { "Email", new List<string> { "An account with this email was created but not verified. Please check your inbox or request a new verification link." } }
+            }
+                    });
+                }
+
+                // 2. User exists and IS fully confirmed (Standard Duplicate Error)
+                return BadRequest(new
+                {
+                    Message = "Registration Failed",
+                    Code = "DuplicateAccount", 
+                    Errors = new Dictionary<string, List<string>>
+        {
+            { "Email", new List<string> { $"The email {userRegisterDto.EmailAddress} is already in use. Please log in." } }
+        }
+                });
             }
 
             User newUser = new User()
             {
 
+                UserName = userRegisterDto.EmailAddress, 
                 Email = userRegisterDto.EmailAddress,
+                FullName = userRegisterDto.UserName,     
                 EmailConfirmed = false,
-                UserName = userRegisterDto.UserName,
                 SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow,
 
                 //  default values 
                 Country = "Egypt", 
@@ -79,28 +110,16 @@ namespace Motqin.Controllers
             {
 
                 //Add user role
-
-                switch (userRegisterDto.Role)
-                {
-                    case UserRoles.Manager:
-                        await _userManager.AddToRoleAsync(newUser, UserRoles.Manager);
-                        break;
-                    case UserRoles.Student:
-                        await _userManager.AddToRoleAsync(newUser, UserRoles.Student);
-                        break;
-                    default:
-                        break;
-                }
+                await _userManager.AddToRoleAsync(newUser, UserRoles.Manager);
 
                 // generate email confirmation token
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-
-                // email service to send the mail, but not implemented yet 
-
-               await _emailService.SendEmailAsync(
-               newUser.Email,
-               "Confirm your email",
-                $@"
+                try
+                {
+                    await _emailService.SendEmailAsync(
+                    newUser.Email,
+                    "Confirm your email",
+                     $@"
                 <h2>Welcome {newUser.UserName}!</h2>    
                 <p>Your email verification code is:</p>
                 <h3>{code}</h3>
@@ -109,12 +128,64 @@ namespace Motqin.Controllers
 
 
 
-                return Ok($"Please confirm your email with the code sent to you ");
+                    return Ok(new
+                    {
+                        Message = "Registration successful. Please check your email to verify your account.",
+                        RequiresEmailResend = false
+                    });
+
+                }
+                catch (Exception ex)
+                {
+
+                    return Ok(new
+                    {
+                        Message = "Registration successful, but we could not send the verification email at this time.",
+                        RequiresEmailResend = true,
+                        // Optional: You can remove the Error property in production to hide technical details from users
+                        Error = "Email service temporarily unavailable."
+                    });
+
+                    // need to re send the verifecation email
+                }
             }
-            return BadRequest("User could not be created");
+
+
+                var identityErrors = new Dictionary<string, List<string>>();
+
+            foreach (var error in result.Errors)
+            {
+                
+                if (error.Code.StartsWith("Password"))
+                {
+                    if (!identityErrors.ContainsKey("Password")) identityErrors["Password"] = new List<string>();
+                    identityErrors["Password"].Add(error.Description);
+                }
+
+                else if (error.Code.Contains("Email"))
+                {
+                    if (!identityErrors.ContainsKey("Email")) identityErrors["Email"] = new List<string>();
+                    identityErrors["Email"].Add(error.Description);
+                }
+
+                else if (error.Code.Contains("UserName"))
+                {
+                    if (!identityErrors.ContainsKey("UserName")) identityErrors["UserName"] = new List<string>();
+                    identityErrors["UserName"].Add(error.Description);
+                }
+
+                else
+                {
+                    if (!identityErrors.ContainsKey("General")) identityErrors["General"] = new List<string>();
+                    identityErrors["General"].Add(error.Description);
+                }
+            }
+
+            return BadRequest(new { Message = "Validation Failed", Errors = identityErrors });
+        
         }
 
-        [HttpPost("VerifyEmailAuthority")]
+        [HttpPost("verify-email")]
         public async Task<IActionResult> VerifyEmailAuthority(string? email, string? code) // we can make Dto
         {
             // 1. Validate the input payload
@@ -146,7 +217,7 @@ namespace Motqin.Controllers
         }
 
 
-        [HttpPost("login-user")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
@@ -220,7 +291,7 @@ namespace Motqin.Controllers
         {
             var authClaims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
@@ -282,7 +353,7 @@ namespace Motqin.Controllers
 
         
 
-[HttpPost("google-regester-or-login")]
+[HttpPost("google")]
     public async Task<IActionResult> GoogleRegesterOrLogin([FromBody] GoogleRegesterOrLoginDto model)
     {
         if (string.IsNullOrWhiteSpace(model.IdToken))
@@ -313,10 +384,13 @@ namespace Motqin.Controllers
         {
             user = new User
             {
+                UserName = payload.Email,                
                 Email = payload.Email,
-                UserName = payload.Email,
-                EmailConfirmed = true, // Google already verified email
+                FullName = payload.Name,                 
+                EmailConfirmed = true,
                 SecurityStamp = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow,
+
                 Country = "Egypt",
                 EducationalStage = EducationalStage.Secondary,
                 GradeLevel = GradeLevel.Third
@@ -334,7 +408,200 @@ namespace Motqin.Controllers
 
         return Ok(token);
     }
+        [HttpPost("register-phone")]
+        public async Task<IActionResult> RegisterPhone([FromBody] PhoneRegisterDto dto)
+        {
+            if (!ModelState.IsValid)/// model validation
+            {
+                return BadRequest(new { Message = "Validation Failed", Errors = ModelState });
+            }
+
+            // 1. Check if the phone number already exists
+            var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            // exist virified , or not verified
+            if (existingUser != null)
+            {
+                if (existingUser.PhoneNumberConfirmed)
+                {
+                    return BadRequest(new { Message = "This phone number is already registered. Please log in." });
+                }
+
+                // 2. If they exist but never verified their phone, just generate and send a NEW code
+                var resendCode = await _userManager.GenerateChangePhoneNumberTokenAsync(existingUser, existingUser.PhoneNumber);
+
+                // TODO: Call your SMS service provider here to send 'resendCode' to existingUser.PhoneNumber
+
+                return Ok(new { Message = "Account exists but is unverified. A new SMS code has been sent." });
+            }
+
+            // 3. Create the new User
+            User newUser = new User()
+            {
+                UserName = dto.PhoneNumber, 
+                PhoneNumber = dto.PhoneNumber,
+                CreatedAt = DateTime.UtcNow,
+
+                // default values
+                PhoneNumberConfirmed = false,
+                FullName = dto.Name, // Using the duplicate-friendly property we discussed
+                Email = $"{dto.PhoneNumber}@motqin.internal", // Dummy email to bypass Identity's unique email requirement
+                SecurityStamp = Guid.NewGuid().ToString(),
+                Country = "Egypt",
+                EducationalStage = EducationalStage.Secondary,
+                GradeLevel = GradeLevel.Third
+            };
+
+            // 4. Generate a random complex password to satisfy Identity's password rules
+
+            // (Guid + uppercase + lowercase + number + special character)
+            string randomGeneratedPassword = Guid.NewGuid().ToString() + "Aa1@";
+
+            var result = await _userManager.CreateAsync(newUser, randomGeneratedPassword);
+
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(newUser, UserRoles.Student);
+
+                // 5. Generate the 6-digit SMS OTP Token
+                var code = await _userManager.GenerateChangePhoneNumberTokenAsync(newUser, newUser.PhoneNumber);
+
+                try
+                {
+                    // TODO: Call your SMS provider (e.g., Twilio, Infobip, Vodafone) here
+                    // await _smsService.SendSmsAsync(newUser.PhoneNumber, $"Your Motqin verification code is: {code}");
+
+                    return Ok(new { Message = $"Registration successful. Please check your phone for the verification code, your code is {code}" });
+                }
+                catch (Exception)
+                {
+                    return Ok(new { Message = "Registration successful, but SMS failed to send. Please request a new code.", RequiresSmsResend = true });
+                }
+            }
+
+            // 6.Handle unexpected Identity errors
+            var identityErrors = result.Errors.Select(e => e.Description).ToList();
+            return BadRequest(new { Message = "Registration Failed", Errors = identityErrors });
+        }
 
 
-}
+        [HttpPost("verify-phone")]
+        public async Task<IActionResult> VerifyPhone([FromBody] PhoneVerifyDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { Message = "Validation Failed", Errors = ModelState });
+            }
+
+            // 1. Find the user
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+
+            if (user == null)
+            {
+                return BadRequest(new { Message = "Invalid phone number." });
+            }
+
+            if (user.PhoneNumberConfirmed)
+            {
+                return BadRequest(new { Message = "This phone number is already verified." });
+            }
+
+            // 2. Validate the SMS code
+            var isVerified = await _userManager.VerifyChangePhoneNumberTokenAsync(user, dto.Code, user.PhoneNumber);
+
+            if (isVerified)
+            {
+                // 3. Mark the phone as confirmed in the database
+                user.PhoneNumberConfirmed = true;
+                await _userManager.UpdateAsync(user);
+
+                // 4. Best UX: Automatically log them in by returning a JWT token right now
+                var token = await GenerateJWTTokenAsync(user, null);
+
+                return Ok(new
+                {
+                    Message = "Phone number verified successfully.",
+                    Token = token // The frontend saves this and redirects them to the main screen
+                });
+            }
+
+            return BadRequest(new { Message = "Invalid or expired verification code." });
+        }
+
+        [HttpPost("facebook")]
+        public async Task<IActionResult> FacebookLogin([FromBody] FacebookLoginDto model)
+        {
+            if (string.IsNullOrWhiteSpace(model.AccessToken))
+                return BadRequest("Invalid request");
+
+            var httpClient = _httpClientFactory.CreateClient();
+
+            // 1. Get app credentials from appsettings
+            var appId = _configuration["Authentication:Facebook:AppId"];
+            var appSecret = _configuration["Authentication:Facebook:AppSecret"];
+
+            // 2. Validate the token using Facebook's debug_token endpoint
+            var debugTokenUrl = $"https://graph.facebook.com/debug_token?input_token={model.AccessToken}&access_token={appId}|{appSecret}";
+            var tokenValidationResponse = await httpClient.GetAsync(debugTokenUrl);
+
+            if (!tokenValidationResponse.IsSuccessStatusCode)
+                return BadRequest("Invalid Facebook token");
+
+            var validationResult = await tokenValidationResponse.Content.ReadFromJsonAsync<FacebookTokenValidationResult>();
+
+            if (validationResult == null || !validationResult.Data.IsValid || validationResult.Data.AppId != appId)
+            {
+                return Unauthorized("Token is invalid or not associated with this application.");
+            }
+
+            // 3. Fetch user info using the validated token
+            var userInfoUrl = $"https://graph.facebook.com/v18.0/me?fields=id,email,name&access_token={model.AccessToken}";
+            var userInfoResponse = await httpClient.GetAsync(userInfoUrl);
+
+            if (!userInfoResponse.IsSuccessStatusCode)
+                return BadRequest("Failed to retrieve user info from Facebook.");
+
+            var facebookUser = await userInfoResponse.Content.ReadFromJsonAsync<FacebookUserInfoResult>();
+
+            if (facebookUser == null || string.IsNullOrWhiteSpace(facebookUser.Email))
+            {
+                // Note: Users can sign up for Facebook using only a phone number, which means Email might be null.
+                return BadRequest("Your Facebook account does not have an associated email address.");
+            }
+
+            // 4. Check if user already exists in your database
+            var user = await _userManager.FindByEmailAsync(facebookUser.Email);
+
+            if (user == null)
+            {
+                // 5. Create new user if they don't exist
+                user = new User
+                {
+                    Email = facebookUser.Email,
+                    UserName = facebookUser.Email, 
+                    EmailConfirmed = true,         
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    FullName = facebookUser.Name,  
+                    CreatedAt = DateTime.UtcNow,
+
+                    // Your default values
+                    Country = "Egypt",
+                    EducationalStage = EducationalStage.Secondary,
+                    GradeLevel = GradeLevel.Third
+                };
+
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                    return BadRequest(new { Message = "User creation failed", Errors = result.Errors.Select(e => e.Description) });
+
+                await _userManager.AddToRoleAsync(user, UserRoles.Student);
+            }
+
+            // 6. Generate your application's JWT
+            var token = await GenerateJWTTokenAsync(user, null);
+
+            return Ok(token);
+        }
+
+
+    }
 }

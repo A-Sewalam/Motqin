@@ -8,6 +8,10 @@ namespace Motqin.Models
 {
     public class User : IdentityUser
     {
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
+        public string FullName { get; set; } // we use custome name to allow us add duplicated user name 
+        public DateTime CreatedAt { get; set; }
 
         [StringLength(100)]
         public  string Country { get; set; }
