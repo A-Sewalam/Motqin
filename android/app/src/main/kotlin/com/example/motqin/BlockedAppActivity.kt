@@ -94,7 +94,38 @@ class BlockedAppActivity : Activity() {
     }
 
     override fun onBackPressed() {
-        finishAndGoHome()
+        // Intentionally blocked — pressing back does nothing.
+    }
+
+    override fun onUserLeaveHint() {
+        // Called when user presses home or swipes up (gesture nav).
+        // Relaunch ourselves so the block screen immediately comes back.
+        if (AppBlockerService.isBlockActive(applicationContext)) {
+            relaunchSelf()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Lost focus for any reason — relaunch if block is still active.
+        // Small delay so AllowedAppsActivity can open without being overridden.
+        if (AppBlockerService.isBlockActive(applicationContext)) {
+            window.decorView.postDelayed({
+                if (AppBlockerService.isBlockActive(applicationContext)) {
+                    relaunchSelf()
+                }
+            }, 300)
+        }
+    }
+
+    private fun relaunchSelf() {
+        val blockedPkg = intent?.getStringExtra(EXTRA_BLOCKED_PKG) ?: ""
+        val intent = Intent(this, BlockedAppActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            putExtra(EXTRA_BLOCKED_PKG, blockedPkg)
+        }
+        startActivity(intent)
     }
 
     // ── UI ──────────────────────────────────────────────────────────────

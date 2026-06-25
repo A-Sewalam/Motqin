@@ -247,7 +247,7 @@ class UnderstandUnitsScreen extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           title: Text(
-            'اللغة $subjectNameAr',
+            ' $subjectNameAr',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,

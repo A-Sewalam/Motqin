@@ -30,7 +30,9 @@
             android:name=".BlockedAppActivity"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:excludeFromRecents="true"
-            android:taskAffinity=""
+            android:noHistory="true"
+            android:taskAffinity="com.example.motqin.block"
+            android:launchMode="singleInstance"
             android:hardwareAccelerated="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="false" />

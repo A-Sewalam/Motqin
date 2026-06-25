@@ -82,9 +82,19 @@ class _RestrictAppUsageWidgetState extends State<RestrictAppUsageWidget> {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   /// Everything NOT in _allowedPackages gets blocked.
+  /// Motqin itself and system packages are always excluded.
+  static const _neverBlock = {
+    'com.example.motqin',
+    'com.android.systemui',
+    'com.sec.android.app.launcher',
+    'com.android.launcher3',
+    'com.android.launcher',
+  };
+
   Set<String> get _packagesToBlock => _allApps
       .map((a) => a.packageName)
       .where((pkg) => !_allowedPackages.contains(pkg))
+      .where((pkg) => !_neverBlock.contains(pkg))
       .toSet();
 
   void _notifyBlockedPackages() {

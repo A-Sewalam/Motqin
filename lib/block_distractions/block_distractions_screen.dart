@@ -228,7 +228,7 @@ class _PermissionsSheet extends StatefulWidget {
   State<_PermissionsSheet> createState() => _PermissionsSheetState();
 }
 
-class _PermissionsSheetState extends State<_PermissionsSheet> {
+class _PermissionsSheetState extends State<_PermissionsSheet> with WidgetsBindingObserver {
   late bool _accessibilityGranted;
   late bool _deviceAdminGranted;
   late bool _overlayGranted;
@@ -240,6 +240,22 @@ class _PermissionsSheetState extends State<_PermissionsSheet> {
     _accessibilityGranted = widget.accessibilityGranted;
     _deviceAdminGranted = widget.deviceAdminGranted;
     _overlayGranted = widget.overlayGranted;
+    // Auto-refresh when user comes back from system settings
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When the app resumes (user came back from settings), refresh immediately
+    if (state == AppLifecycleState.resumed) {
+      _refresh();
+    }
   }
 
   bool get _allGranted =>
@@ -358,23 +374,9 @@ class _PermissionsSheetState extends State<_PermissionsSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Refresh + Done buttons
+            // Done button (تحديث removed — state updates automatically on resume)
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _refresh,
-                    icon: const Icon(Icons.refresh, size: 18),
-                    label: const Text('تحديث'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: const BorderSide(color: Color(0xFFE5E7EB)),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
