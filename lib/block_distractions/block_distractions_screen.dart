@@ -43,11 +43,10 @@ class _BlockDistractionsScreenState extends State<BlockDistractionsScreen> {
     final prefs = await SharedPreferences.getInstance();
     final onboardingShown = prefs.getBool(_kOnboardingShown) ?? false;
 
-    // Show the sheet on first open OR if any permission is still missing
-    final allGranted =
-        _accessibilityGranted && _deviceAdminGranted && _overlayGranted;
-
-    if (!onboardingShown || !allGranted) {
+    // Show the sheet ONLY on the very first open.
+    // Never show again after that — missing permissions are
+    // handled by the small banner inside the screen.
+    if (!onboardingShown) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _showPermissionsSheet();
       });
