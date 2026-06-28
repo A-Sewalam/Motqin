@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:motqin/master_lessons/questions_screen.dart';
 import 'package:motqin/utils/app_colors.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Screen 1 — Subjects List (Updated to a 3-Column Grid)
@@ -404,7 +406,7 @@ class _UnitCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Screen 3 — Unit Vocabulary (Remains Unchanged)
+// Screen 3 — Unit Vocabulary (Updated to navigate to QuestionsScreen)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class UnitVocabularyScreen extends StatelessWidget {
@@ -451,6 +453,7 @@ class UnitVocabularyScreen extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
+            // ── Subject header card ───────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -477,9 +480,11 @@ class UnitVocabularyScreen extends StatelessWidget {
                 ],
               ),
             ),
+
+            // ── Card 1: المفردات الأساسية ─────────────────────────
             _vocabCard(
               context: context,
-              titleAr: 'المفردات الأساسية',
+              vocabTypeAr: 'المفردات الأساسية', // Renamed parameter to distinguish from lesson name
               description: 'أهم 20 كلمة يجب حفظها في هذه الوحدة',
               badgeIcon: Icons.star_border_outlined,
               badgeText: 'كلمة أساسية 20',
@@ -487,11 +492,16 @@ class UnitVocabularyScreen extends StatelessWidget {
               badgeBg: const Color(0xFFFFEBEE),
               btnColor: const Color(0xFFE53935),
               btnText: 'ابدأ الحفظ',
+              totalQuestionsCount: 20, // Pass specific counts if needed
+              ignoredQuestionsCount: 2,
             ),
+
             const SizedBox(height: 16),
+
+            // ── Card 2: المفردات الإضافية ─────────────────────────
             _vocabCard(
               context: context,
-              titleAr: 'المفردات الإضافية',
+              vocabTypeAr: 'المفردات الإضافية',
               description: 'كلمة إضافية لتوسيع مفرداتك 30',
               badgeIcon: Icons.add_outlined,
               badgeText: 'كلمة إضافية 30',
@@ -499,8 +509,13 @@ class UnitVocabularyScreen extends StatelessWidget {
               badgeBg: const Color(0xFFdbeafe),
               btnColor: const Color(0xFF3B82F6),
               btnText: 'ابدأ الحفظ',
+              totalQuestionsCount: 30,
+              ignoredQuestionsCount: 5,
             ),
+
             const SizedBox(height: 24),
+
+            // ── Tips section ──────────────────────────────────────
             Container(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
               decoration: BoxDecoration(
@@ -575,7 +590,7 @@ class UnitVocabularyScreen extends StatelessWidget {
 
   Widget _vocabCard({
     required BuildContext context,
-    required String titleAr,
+    required String vocabTypeAr,
     required String description,
     required IconData badgeIcon,
     required String badgeText,
@@ -583,6 +598,8 @@ class UnitVocabularyScreen extends StatelessWidget {
     required Color badgeBg,
     required Color btnColor,
     required String btnText,
+    required int totalQuestionsCount,
+    required int ignoredQuestionsCount,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -609,8 +626,9 @@ class UnitVocabularyScreen extends StatelessWidget {
             child: Icon(badgeIcon, color: badgeColor, size: 34),
           ),
           const SizedBox(height: 12),
+
           Text(
-            titleAr,
+            vocabTypeAr,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -618,15 +636,16 @@ class UnitVocabularyScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
+
           Text(
             description,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13, color: Colors.grey),
           ),
           const SizedBox(height: 14),
+
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
             decoration: BoxDecoration(
               color: badgeBg,
               borderRadius: BorderRadius.circular(20),
@@ -648,10 +667,26 @@ class UnitVocabularyScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
+
+          // Updated Button Action to Navigate
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => QuestionsScreen(
+                      subjectNameAr: subjectNameAr,
+                      lessonNameAr: '$unitTitleAr ($vocabTypeAr)', // Combines lesson (e.g. الوحدة الأولى) + card type
+                      totalQuestions: totalQuestionsCount,
+                      ignoredQuestions: ignoredQuestionsCount,
+                      color: btnColor,
+                      bgColor: badgeBg,
+                      icon: badgeIcon,
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: btnColor,
                 foregroundColor: Colors.white,
