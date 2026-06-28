@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(backgroundColor: 
       AppColors.bgColor,),
       drawer: SizedBox(
-        width: 200,
+        width: 250,
         child: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -24,7 +24,7 @@ class HomeScreen extends StatelessWidget {
             //   child: Text('القائمة', style: TextStyle(color: Colors.white)),
               
             // ),
-            SizedBox(height: 30,),
+            SizedBox(height: 60,),
             ListTile(
               leading: Icon(Icons.account_circle_outlined, color: Color(0xFF2563EB), 
               size: 40,),
@@ -33,6 +33,42 @@ class HomeScreen extends StatelessWidget {
                 Navigator.of(context).pushNamed(AppRoutes.profileRouteName);
               },
             ),
+            Divider(color: Colors.grey, thickness: 1),
+            ListTile(
+            leading: Icon(Icons.account_balance_wallet, color: Color(0xFF2563EB)),
+            title: Text('المحفظة والعروض'),
+            onTap: () {
+              // Navigate to Wallet & Offers screen
+            },
+          ),
+          Divider(color: Colors.grey, thickness: 1),
+          ListTile(
+          leading: Icon(Icons.block, color: Color(0xFF2563EB)),
+          title: Text('تفضيلات منع المشتتات'),
+          onTap: () {
+            // Navigate to Distraction Blocking Preferences screen
+          },
+        ),
+
+
+            ListTile(
+        leading: Icon(Icons.book, color: Color(0xFF2563EB)),
+        title: Text('تفضيلات اتقن دروسك'),
+        onTap: () {
+          // Navigate to Lessons Preferences screen
+        },
+      ),
+
+       
+         ListTile(
+        leading: Icon(Icons.school, color: Color(0xFF2563EB)),
+        title: Text('تفضيلات المخطط الدراسى'),
+        onTap: () {
+          // Navigate to Study Plan Preferences screen
+        },
+      ),
+      
+      Divider(color: Colors.grey, thickness: 1),
             // Add more ListTiles for other routes
           ],
         ),
