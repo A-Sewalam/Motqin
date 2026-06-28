@@ -51,7 +51,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get or => 'Or';
 
   @override
+  String get enter_your_phone => 'enter your phone';
+
+  @override
   String get user_name => 'User Name';
+
+  @override
+  String get login_with_google => 'Login With Google';
+
+  @override
+  String get login_with_facebook => 'Login With Facebook';
 
   @override
   String get leaderboards_and_competitions => 'LeaderBoard And Competitions';

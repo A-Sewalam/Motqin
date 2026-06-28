@@ -43,9 +43,18 @@
 "or" : "أو",
 "@or": {},
 
+
+"enter_your_phone" : "أدخل رقم هاتفك",
+"@enter_your_phone": {},
+
 "user_name" : "اسم المستخدم",
 "@user_name": {},
 
+"login_with_google" : "تسجيل دخول باستخدام جوجل",
+"@login_with_google": {},
+
+"login_with_facebook" : "تسجيل دخول باستخدام فيسبوك",
+"@login_with_facebook": {},
 
 "leaderboards_and_competitions" : "قوائم الصدارة والمسابقات",
 "@leaderboards_and_competitions": {},

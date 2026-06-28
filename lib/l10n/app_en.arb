@@ -51,6 +51,10 @@
 "or" : "Or",
 "@or": {},
 
+
+"enter_your_phone" : "enter your phone",
+"@enter_your_phone": {},
+
 "user_name" : "User Name",
 "@user_name": {},
 

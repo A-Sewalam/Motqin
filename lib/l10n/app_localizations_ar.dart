@@ -51,7 +51,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get or => 'أو';
 
   @override
+  String get enter_your_phone => 'أدخل رقم هاتفك';
+
+  @override
   String get user_name => 'اسم المستخدم';
+
+  @override
+  String get login_with_google => 'تسجيل دخول باستخدام جوجل';
+
+  @override
+  String get login_with_facebook => 'تسجيل دخول باستخدام فيسبوك';
 
   @override
   String get leaderboards_and_competitions => 'قوائم الصدارة والمسابقات';

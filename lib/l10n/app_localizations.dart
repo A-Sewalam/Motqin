@@ -182,11 +182,29 @@ abstract class AppLocalizations {
   /// **'أو'**
   String get or;
 
+  /// No description provided for @enter_your_phone.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رقم هاتفك'**
+  String get enter_your_phone;
+
   /// No description provided for @user_name.
   ///
   /// In ar, this message translates to:
   /// **'اسم المستخدم'**
   String get user_name;
+
+  /// No description provided for @login_with_google.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل دخول باستخدام جوجل'**
+  String get login_with_google;
+
+  /// No description provided for @login_with_facebook.
+  ///
+  /// In ar, this message translates to:
+  /// **'تسجيل دخول باستخدام فيسبوك'**
+  String get login_with_facebook;
 
   /// No description provided for @leaderboards_and_competitions.
   ///
