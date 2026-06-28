@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motqin/utils/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Screen 1 — Subjects List
+// Screen 1 — Subjects List (Updated to a 3-Column Grid)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class MasterLessonsScreen extends StatelessWidget {
@@ -82,8 +82,14 @@ class MasterLessonsScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ListView.builder(
+              child: GridView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,       // 3 items per row
+                  crossAxisSpacing: 12,    // Horizontal space between items
+                  mainAxisSpacing: 12,     // Vertical space between items
+                  childAspectRatio: 0.75,  // Adjust ratio to fit height properly
+                ),
                 itemCount: _subjects.length,
                 itemBuilder: (context, index) {
                   final s = _subjects[index];
@@ -121,22 +127,23 @@ class _SubjectCard extends StatelessWidget {
         ));
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.symmetric(vertical: 28),
-        width: double.infinity,
+        padding: const EdgeInsets.all(8), // Reduced padding to fit the smaller grid cell
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 52, color: color),
-            const SizedBox(height: 12),
+            Icon(icon, size: 36, color: color), // Sized down slightly for grid scaling
+            const SizedBox(height: 8),
             Text(
               subject['nameAr'] as String,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 14, // Scaled down text size
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -144,7 +151,10 @@ class _SubjectCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subject['nameEn'] as String,
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
         ),
@@ -154,7 +164,7 @@ class _SubjectCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Screen 2 — Units List
+// Screen 2 — Units List (Remains Unchanged)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SubjectUnitsScreen extends StatelessWidget {
@@ -206,7 +216,6 @@ class SubjectUnitsScreen extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           children: [
-            // Subject header card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -235,8 +244,6 @@ class SubjectUnitsScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Units
             ..._units.map((unit) => _UnitCard(
                   unit: unit,
                   color: color,
@@ -308,7 +315,6 @@ class _UnitCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Icon + check
             Row(
               children: [
                 const Spacer(),
@@ -325,8 +331,6 @@ class _UnitCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-
-            // Title
             Text(
               unit['titleEn'] as String,
               style: TextStyle(
@@ -338,8 +342,6 @@ class _UnitCard extends StatelessWidget {
               style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
             const SizedBox(height: 12),
-
-            // Progress bar
             Row(
               children: [
                 const Text('التقدم',
@@ -365,8 +367,6 @@ class _UnitCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // Action button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -404,7 +404,7 @@ class _UnitCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Screen 3 — Unit Vocabulary
+// Screen 3 — Unit Vocabulary (Remains Unchanged)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class UnitVocabularyScreen extends StatelessWidget {
@@ -451,7 +451,6 @@ class UnitVocabularyScreen extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
-            // ── Subject header card ───────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -478,8 +477,6 @@ class UnitVocabularyScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // ── Card 1: المفردات الأساسية ─────────────────────────
             _vocabCard(
               context: context,
               titleAr: 'المفردات الأساسية',
@@ -491,10 +488,7 @@ class UnitVocabularyScreen extends StatelessWidget {
               btnColor: const Color(0xFFE53935),
               btnText: 'ابدأ الحفظ',
             ),
-
             const SizedBox(height: 16),
-
-            // ── Card 2: المفردات الإضافية ─────────────────────────
             _vocabCard(
               context: context,
               titleAr: 'المفردات الإضافية',
@@ -506,10 +500,7 @@ class UnitVocabularyScreen extends StatelessWidget {
               btnColor: const Color(0xFF3B82F6),
               btnText: 'ابدأ الحفظ',
             ),
-
             const SizedBox(height: 24),
-
-            // ── Tips section ──────────────────────────────────────
             Container(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
               decoration: BoxDecoration(
@@ -537,9 +528,6 @@ class UnitVocabularyScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   ..._tips.asMap().entries.map((entry) {
                     final tip = entry.value;
-                    
-
-                    // Pick a color based on the index
                     final Color tileBg;
                     switch (entry.key) {
                       case 0:
@@ -574,7 +562,6 @@ class UnitVocabularyScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
                     );
                   }),
                 ],
@@ -612,7 +599,6 @@ class UnitVocabularyScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Circle icon
           Container(
             width: 70,
             height: 70,
@@ -623,8 +609,6 @@ class UnitVocabularyScreen extends StatelessWidget {
             child: Icon(badgeIcon, color: badgeColor, size: 34),
           ),
           const SizedBox(height: 12),
-
-          // Title
           Text(
             titleAr,
             style: TextStyle(
@@ -634,16 +618,12 @@ class UnitVocabularyScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-
-          // Description
           Text(
             description,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13, color: Colors.grey),
           ),
           const SizedBox(height: 14),
-
-          // Badge chip
           Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
@@ -668,8 +648,6 @@ class UnitVocabularyScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-
-          // Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
