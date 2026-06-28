@@ -135,6 +135,26 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       ),
 
+                      SizedBox(height: 10,),
+                      // ── Divider ───────────────────────────────────────────────────
+                      Row(children: [
+                        Expanded(
+                            child: Divider(
+                                color: AppColors.lightGreyColor,
+                                thickness: 2,
+                                indent: width * 0.02,
+                                endIndent: width * 0.06)),
+                        Text(AppLocalizations.of(context)!.or,
+                            style: AppStyles.medium16MainColor),
+                        Expanded(
+                            child: Divider(
+                                color: AppColors.lightGreyColor,
+                                thickness: 2,
+                                indent: width * 0.06,
+                                endIndent: width * 0.02)),
+                      ]),
+
+
                       Text(
                         AppLocalizations.of(context)!.create_your_account,
                         style: Theme.of(context).textTheme.labelLarge,
