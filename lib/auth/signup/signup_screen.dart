@@ -107,11 +107,38 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
 
+                      SizedBox(
+                        width: double.infinity,
+                        child: CustomElevatedButton(
+                          backgroundColor: AppColors.whiteColor,
+                          onpressed: () {},
+                          label: Text(
+                            AppLocalizations.of(context)!.sign_up_with_facebook,
+                            style: AppStyles.medium16MainColor,
+                          ),
+                          icon: const Icon(FontAwesomeIcons.facebook,
+                              color: Colors.blue),
+                        ),
+                      ),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: CustomElevatedButton(
+                          backgroundColor: AppColors.whiteColor,
+                          onpressed: () {},
+                          label: Text(
+                            AppLocalizations.of(context)!.sign_up_with_google,
+                            style: AppStyles.medium16MainColor,
+                          ),
+                          icon: Image.asset(AppAssets.googleLogo, height: 19, width: 19),
+
+                      ),
+                      ),
+
                       Text(
                         AppLocalizations.of(context)!.create_your_account,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
-
                       // Name
                       CustomTextField(
                         controller: _nameController,
@@ -260,51 +287,6 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         ],
                       ),
-
-                      Row(children: [
-                        Expanded(
-                            child: Divider(
-                                color: AppColors.lightGreyColor,
-                                thickness: 2,
-                                indent: width * 0.02,
-                                endIndent: width * 0.06)),
-                        Text(AppLocalizations.of(context)!.or,
-                            style: AppStyles.medium16MainColor),
-                        Expanded(
-                            child: Divider(
-                                color: AppColors.lightGreyColor,
-                                thickness: 2,
-                                indent: width * 0.06,
-                                endIndent: width * 0.02)),
-                      ]),
-
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: CustomElevatedButton(
-                          backgroundColor: AppColors.whiteColor,
-                          onpressed: () {},
-                          label: Text(
-                            AppLocalizations.of(context)!.sign_up_with_facebook,
-                            style: AppStyles.medium16MainColor,
-                          ),
-                          icon: const Icon(FontAwesomeIcons.facebook,
-                              color: Colors.blue),
-                        ),
-                      ),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: CustomElevatedButton(
-                          backgroundColor: AppColors.whiteColor,
-                          onpressed: () {},
-                          label: Text(
-                            AppLocalizations.of(context)!.sign_up_with_google,
-                            style: AppStyles.medium16MainColor,
-                          ),
-                          icon: Image.asset(AppAssets.googleLogo, height: 19, width: 19),
-
-                      ),)
                     ],
                   ),
                 ),
