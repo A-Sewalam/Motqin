@@ -96,6 +96,55 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
+              SizedBox(height: 10,),
+
+              // ── Facebook ──────────────────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: CustomElevatedButton(
+                  backgroundColor: AppColors.whiteColor,
+                  onpressed: () {},
+                  label: Text(
+                    AppLocalizations.of(context)!.login_with_facebook,
+                    style: AppStyles.medium16MainColor,
+                  ),
+                  icon: const Icon(FontAwesomeIcons.facebook, color: Colors.blue),
+                ),
+              ),
+
+              // ── Google ────────────────────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: CustomElevatedButton(
+                  backgroundColor: AppColors.whiteColor,
+                  onpressed: () => Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.verifyEmailRouteName),
+                  label: Text(
+                    AppLocalizations.of(context)!.login_with_google,
+                    style: AppStyles.medium16MainColor,
+                  ),
+                  icon: Image.asset(AppAssets.googleLogo, height: 19, width: 19),
+                ),
+              ),
+
+              SizedBox(height: 5,),
+              // ── Divider ───────────────────────────────────────────────────
+              Row(children: [
+                Expanded(
+                    child: Divider(
+                        color: AppColors.lightGreyColor,
+                        thickness: 2,
+                        indent: width * 0.02,
+                        endIndent: width * 0.06)),
+                Text(AppLocalizations.of(context)!.or,
+                    style: AppStyles.medium16MainColor),
+                Expanded(
+                    child: Divider(
+                        color: AppColors.lightGreyColor,
+                        thickness: 2,
+                        indent: width * 0.06,
+                        endIndent: width * 0.02)),
+              ]),
               // ── Title ─────────────────────────────────────────────────────
               Text(
                 AppLocalizations.of(context)!.login_to_your_account,
@@ -117,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         : AppColors.whiteColor,
                     size: 25),
                 suffixIcon: null,
-                hintText: AppLocalizations.of(context)!.enter_your_email,
+                hintText: AppLocalizations.of(context)!.enter_your_name,
                 hintStyle: AppStyles.regular14greyColor,
                 keyboardType: TextInputType.emailAddress,
                 // validator: (v) => v == null || v.isEmpty ? 'يرجى إدخال البريد الإلكتروني' : null,
@@ -149,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 obscureText: _obscurePassword,
-                hintText: AppLocalizations.of(context)!.enter_your_password,
+                hintText: AppLocalizations.of(context)!.enter_your_phone,
                 hintStyle: AppStyles.regular14greyColor,
                 // validator: (v) => v == null || v.isEmpty ? 'يرجى إدخال كلمة المرور' : null,
               ),
@@ -204,54 +253,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
 
-
-              // ── Divider ───────────────────────────────────────────────────
-              Row(children: [
-                Expanded(
-                    child: Divider(
-                        color: AppColors.lightGreyColor,
-                        thickness: 2,
-                        indent: width * 0.02,
-                        endIndent: width * 0.06)),
-                Text(AppLocalizations.of(context)!.or,
-                    style: AppStyles.medium16MainColor),
-                Expanded(
-                    child: Divider(
-                        color: AppColors.lightGreyColor,
-                        thickness: 2,
-                        indent: width * 0.06,
-                        endIndent: width * 0.02)),
-              ]),
-
-
-              // ── Facebook ──────────────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                child: CustomElevatedButton(
-                  backgroundColor: AppColors.whiteColor,
-                  onpressed: () {},
-                  label: Text(
-                    AppLocalizations.of(context)!.sign_up_with_facebook,
-                    style: AppStyles.medium16MainColor,
-                  ),
-                  icon: const Icon(FontAwesomeIcons.facebook, color: Colors.blue),
-                ),
-              ),
-
-              // ── Google ────────────────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                child: CustomElevatedButton(
-                  backgroundColor: AppColors.whiteColor,
-                  onpressed: () => Navigator.of(context)
-                        .pushReplacementNamed(AppRoutes.verifyEmailRouteName),
-                  label: Text(
-                    AppLocalizations.of(context)!.sign_up_with_google,
-                    style: AppStyles.medium16MainColor,
-                  ),
-                  icon: Image.asset(AppAssets.googleLogo, height: 19, width: 19),
-                ),
-              ),
 
             ],
           ),
