@@ -29,7 +29,7 @@ namespace Motqin.Controllers
             var lessons = await _lessonsService.GetAllAsync(subjectId);
             return Ok(lessons.Select(l => new LessonReadDto
             {
-                LessonId = l.LessonID,
+                LessonId = l.LessonId,
                 SubjectID = l.SubjectID,
                 Title = l.Title
             }));
@@ -43,7 +43,7 @@ namespace Motqin.Controllers
 
             var readDto = new LessonReadDto
             {
-                LessonId = lesson.LessonID,
+                LessonId = lesson.LessonId,
                 SubjectID = lesson.SubjectID,
                 Title = lesson.Title
             };
@@ -67,9 +67,9 @@ namespace Motqin.Controllers
 
             await _lessonsService.CreateAsync(lesson);
 
-            return CreatedAtAction(nameof(GetById), new { id = lesson.LessonID }, new LessonReadDto
+            return CreatedAtAction(nameof(GetById), new { id = lesson.LessonId }, new LessonReadDto
             {
-                LessonId = lesson.LessonID,
+                LessonId = lesson.LessonId,
                 SubjectID = lesson.SubjectID,
                 Title = lesson.Title
             });

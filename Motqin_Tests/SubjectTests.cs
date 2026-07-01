@@ -226,7 +226,7 @@ public class SubjectTests : IntegrationTestBase
         Assert.Null(dbSubject);
 
         // Verify Lesson is also gone (Testing Cascade Delete)
-        var dbLesson = await DbContext.Lessons.FindAsync(lesson.LessonID);
+        var dbLesson = await DbContext.Lessons.FindAsync(lesson.LessonId);
         Assert.Null(dbLesson);
     }
 }

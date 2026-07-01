@@ -8,7 +8,7 @@ namespace Motqin.Models
     public class Lesson
     {
         [Key]
-        public int LessonID { get; set; }
+        public int LessonId { get; set; }
 
         [Required]
         public int SubjectID { get; set; }
@@ -17,7 +17,9 @@ namespace Motqin.Models
         [StringLength(200)]
         public string Title { get; set; }
 
+        public int Difficulty { get; set; }
 
+        public int? EstimatedDuration { get; set; }
         // Navigation Properties
         [ForeignKey("SubjectID")]
         public virtual Subject Subject { get; set; }
@@ -25,5 +27,6 @@ namespace Motqin.Models
         public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
         public virtual ICollection<SpacedRepetitionSession> StudySessions { get; set; } = new List<SpacedRepetitionSession>();
         public virtual ICollection<StudyPlan> StudyPlans { get; set; } = new List<StudyPlan>();
+        public virtual ICollection<UserLessons> UsersToStudy { get; set; } = [];
     }
 }

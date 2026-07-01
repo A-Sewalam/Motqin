@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.SemanticKernel;
 using Motqin.Data;
 using Motqin.Models;
 using Motqin.Services;
@@ -50,6 +51,7 @@ namespace Motqin
             builder.Services.AddScoped<Services.ISubjectsService, Services.SubjectsService>();
             builder.Services.AddScoped<Services.IPlanService, Services.PlanService>();
             builder.Services.AddScoped<Services.ISessionService, Services.SessionService>();
+            builder.Services.AddScoped<Services.IPlannerService, Services.PlannerService>();
 
             //EmailService
             builder.Services.AddScoped<IEmailService, SendGridEmailService>();
@@ -107,6 +109,18 @@ namespace Motqin
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = TokenValidationParameters;
+            });
+            // Register Semantic Kernel with Google Gemini
+            builder.Services.AddTransient<Kernel>(sp =>
+            {
+                var kernelBuilder = Kernel.CreateBuilder();
+
+                kernelBuilder.AddGoogleAIGeminiChatCompletion(
+                    modelId: "gemini-2.5-flash", // Or "gemini-1.5-flash" depending on performance needs
+                    apiKey: builder.Configuration["Gemini:ApiKey"]!
+                );
+
+                return kernelBuilder.Build();
             });
             var app = builder.Build();
 

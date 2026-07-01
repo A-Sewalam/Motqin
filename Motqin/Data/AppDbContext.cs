@@ -65,6 +65,9 @@ namespace Motqin.Data
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
 
+        public DbSet<UserLessons> UserToBeStudiedLessons { get; set; }
+        public DbSet<FreeTime> UserFreeTimes { get; set; }
+
         // =========================
         // Fluent API Configuration
         // =========================
@@ -106,7 +109,7 @@ namespace Motqin.Data
             modelBuilder.Entity<SpacedRepetitionSession>()
                 .HasOne(ss => ss.User)
                 .WithMany(u => u.StudySessions)
-                .HasForeignKey(ss => ss.UserID)
+                .HasForeignKey(ss => ss.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
@@ -115,16 +118,7 @@ namespace Motqin.Data
             modelBuilder.Entity<SpacedRepetitionSession>()
                 .HasOne(ss => ss.Lesson)
                 .WithMany(l => l.StudySessions)
-                .HasForeignKey(ss => ss.LessonID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            // -------------------------------------------------
-            // SpacedRepetitionSession → QuestionDetails (1 : Many)
-            // -------------------------------------------------
-            modelBuilder.Entity<QuestionDetails>()
-                .HasOne(qd => qd.StudySession)
-                .WithMany(ss => ss.QuestionDetails)
-                .HasForeignKey(qd => qd.SessionID)
+                .HasForeignKey(ss => ss.LessonId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // -------------------------------------------------
@@ -195,6 +189,20 @@ namespace Motqin.Data
             // Payment Configuration 
             // -------------------------------------------------
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+
+            modelBuilder.Entity<UserLessons>()
+        .HasKey(x => new { x.UserId, x.LessonId });
+
+            modelBuilder.Entity<UserLessons>()
+                .HasOne(x => x.User)
+                .WithMany(x => x.ToBeStudiedLessons)
+                .HasForeignKey(x => x.UserId);
+
+            modelBuilder.Entity<UserLessons>()
+                .HasOne(x => x.Lesson)
+                .WithMany(x => x.UsersToStudy)
+                .HasForeignKey(x => x.LessonId);
         }
     }
 }

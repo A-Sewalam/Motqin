@@ -1,11 +1,13 @@
 ﻿using Motqin.Data;
 using Motqin.Models.Session;
+using System.Threading.Tasks;
 
 namespace Motqin.Services
 {
     public interface ISessionService
     {
-        StudySession? GetById(int id);
+        Task<StudySession?> GetStudySessionById(int id);
+        Task<SpacedRepetitionSession?> GetSPacedRepititionById(int id);
     }
 
     public class SessionService : ISessionService
@@ -17,6 +19,8 @@ namespace Motqin.Services
             this.context = context;
         }
 
-        public StudySession? GetById(int id) => context.StudySessions.Find(id);
+        public async Task<SpacedRepetitionSession?> GetSPacedRepititionById(int id) => await context.SpacedRepetitionSessions.FindAsync(id);
+
+        public async Task<StudySession?> GetStudySessionById(int id) => await context.StudySessions.FindAsync(id);
     }
 }

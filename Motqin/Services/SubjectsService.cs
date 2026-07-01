@@ -12,7 +12,6 @@ namespace Motqin.Services
         Task<List<Subject>> GetAllAsync();
   //    Task<List<Subject>?> GetByUserGradeLevelAsync(int userId);
         Task<Subject?> GetByIdAsync(int id);
-        Task<SpacedRepetitionSession?> GetStudySessionById(int id);
         Task<Subject> CreateAsync(SubjectDto subjectDto);
         Task<bool> UpdateAsync(Subject subject);
         Task<bool> DeleteAsync(int id);
@@ -58,10 +57,7 @@ namespace Motqin.Services
                     .AsNoTracking()
                     .FirstOrDefaultAsync(s => s.SubjectID == id);
         }
-        public async Task<SpacedRepetitionSession?> GetStudySessionById(int id)
-        {
-            return await _context.SpacedRepetitionSessions.AsNoTracking().FirstOrDefaultAsync(s => s.SessionID == id);
-        }
+        
         public async Task<Subject> CreateAsync(SubjectDto subjectDto)
         {
             var newSubject = new Subject()

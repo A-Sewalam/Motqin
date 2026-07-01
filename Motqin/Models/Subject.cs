@@ -22,6 +22,9 @@ namespace Motqin.Models
         [StringLength(50)]
         public GradeLevel GradeLevel { get; set; }
 
+        [Required]
+        public DateOnly ExamDate { get; set; }
+
         // Navigation Property
         public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
     }

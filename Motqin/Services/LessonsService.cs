@@ -32,7 +32,7 @@ namespace Motqin.Services
 
         public async Task UpdateAsync(Lesson lesson)
         {
-            var existingLesson = await _context.Lessons.FindAsync(lesson.LessonID);
+            var existingLesson = await _context.Lessons.FindAsync(lesson.LessonId);
             if (existingLesson == null) return;
             existingLesson.Title = lesson.Title;
             await _context.SaveChangesAsync();
