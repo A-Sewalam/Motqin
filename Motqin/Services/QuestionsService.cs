@@ -7,6 +7,10 @@ namespace Motqin.Services
 {
     public interface IQuestionsService
     {
+        Task<bool> ExistsByTextAsync(string questionText, int lessonId);
+        Task<(List<Question> Items, int Total)> GetPagedAsync(int? lessonId, string? category, string? search, int page, int pageSize, string? sort);
+        Task<QuestionDetails> StartQuestionAsync(int questionId, int sessionId, DateTime startTime);
+        Task<QuestionDetails> EndQuestionAsync(int questionId, int sessionId, DateTime endTime, string? userAnswer, bool isCorrect);
         Task<Question> CreateFillInTheBlankQuestionAsync(FillInTheBlankQuestionDto questionDto);
         Task<Question> CreateMultipleChoiceQuestionAsync(MultipleChoiceQuestionDto questionDto);
         Task<bool> DeleteAsync(int id);
@@ -32,6 +36,43 @@ namespace Motqin.Services
             _context = context;
         }
 
+        public async Task<(List<Question> Items, int Total)> GetPagedAsync(int? lessonId, string? category, string? search, int page, int pageSize, string? sort)
+        {
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 20;
+
+            var query = _context.Questions.AsQueryable();
+
+            if (lessonId.HasValue)
+                query = query.Where(q => q.LessonID == lessonId.Value);
+
+            if (!string.IsNullOrWhiteSpace(category))
+                query = query.Where(q => q.QuestionCategory == category);
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(q => q.QuestionText.Contains(search));
+
+            var total = await query.CountAsync();
+
+            // sorting (basic)
+            if (!string.IsNullOrWhiteSpace(sort))
+            {
+                if (sort.Equals("difficulty", StringComparison.OrdinalIgnoreCase))
+                    query = query.OrderBy(q => q.DifficultyLevel);
+                else if (sort.Equals("created", StringComparison.OrdinalIgnoreCase))
+                    query = query.OrderBy(q => q.QuestionID);
+                else
+                    query = query.OrderBy(q => q.QuestionID);
+            }
+            else
+            {
+                query = query.OrderBy(q => q.QuestionID);
+            }
+
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
+            return (items, total);
+        }
+
         public async Task<List<Question>> GetAllAsync() =>
             await _context.Questions.AsNoTracking().ToListAsync();
 
@@ -40,6 +81,75 @@ namespace Motqin.Services
             return await _context.Questions
                                  .AsNoTracking()
                                  .FirstOrDefaultAsync(q => q.QuestionID == id);
+        }
+
+        public async Task<bool> ExistsByTextAsync(string questionText, int lessonId)
+        {
+            return await _context.Questions
+                .AnyAsync(q => q.LessonID == lessonId && q.QuestionText == questionText);
+        }
+
+        public async Task<QuestionDetails> StartQuestionAsync(int questionId, int sessionId, DateTime startTime)
+        {
+            // ensure question exists
+            var questionExists = await _context.Questions.AnyAsync(q => q.QuestionID == questionId);
+            if (!questionExists) throw new KeyNotFoundException("Question not found");
+
+            var session = await _context.SpacedRepetitionSessions.FindAsync(sessionId);
+            if (session == null) throw new KeyNotFoundException("Session not found");
+
+            var details = await _context.QuestionDetails.FirstOrDefaultAsync(d => d.SessionID == sessionId && d.QuestionID == questionId);
+            if (details == null)
+            {
+                details = new QuestionDetails
+                {
+                    SessionID = sessionId,
+                    QuestionID = questionId,
+                    StartTime = startTime,
+                    EndTime = default,
+                    UserAnswer = null,
+                    IsCorrect = false
+                };
+                _context.QuestionDetails.Add(details);
+            }
+            else
+            {
+                details.StartTime = startTime;
+            }
+            await _context.SaveChangesAsync();
+            return details;
+        }
+
+        public async Task<QuestionDetails> EndQuestionAsync(int questionId, int sessionId, DateTime endTime, string? userAnswer, bool isCorrect)
+        {
+            var questionExists = await _context.Questions.AnyAsync(q => q.QuestionID == questionId);
+            if (!questionExists) throw new KeyNotFoundException("Question not found");
+
+            var session = await _context.SpacedRepetitionSessions.FindAsync(sessionId);
+            if (session == null) throw new KeyNotFoundException("Session not found");
+
+            var details = await _context.QuestionDetails.FirstOrDefaultAsync(d => d.SessionID == sessionId && d.QuestionID == questionId);
+            if (details == null)
+            {
+                details = new QuestionDetails
+                {
+                    SessionID = sessionId,
+                    QuestionID = questionId,
+                    StartTime = DateTime.UtcNow,
+                    EndTime = endTime,
+                    UserAnswer = userAnswer,
+                    IsCorrect = isCorrect
+                };
+                _context.QuestionDetails.Add(details);
+            }
+            else
+            {
+                details.EndTime = endTime;
+                details.UserAnswer = userAnswer;
+                details.IsCorrect = isCorrect;
+            }
+            await _context.SaveChangesAsync();
+            return details;
         }
         public async Task<QuestionDetails?> GetDetailsByIdAsync(int id)
         {
