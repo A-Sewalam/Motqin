@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Motqin.Services;
 using Motqin.Models;
 using Motqin.Dtos.Question;
+using Motqin.Dtos.Api;
+using Microsoft.AspNetCore.Authorization;
+using Motqin.Dtos.Common;
 
 namespace Motqin.Controllers
 {
@@ -17,121 +20,265 @@ namespace Motqin.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Question>>> GetAll()
+        public async Task<ActionResult<ApiResponse<PagedResult<QuestionReadDto>>>> GetAll([FromQuery] int? lessonId, [FromQuery] string? category, [FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sort = null)
         {
-            var items = await _questionsService.GetAllAsync();
-            return Ok(items);
+            var (items, total) = await _questionsService.GetPagedAsync(lessonId, category, search, page, pageSize, sort);
+
+            var dtos = items.Select(q => new QuestionReadDto
+            {
+                QuestionID = q.QuestionID,
+                LessonID = q.LessonID,
+                QuestionCategory = q.QuestionCategory,
+                QuestionText = q.QuestionText,
+                DifficultyLevel = q.DifficultyLevel,
+                QuestionType = q.GetType().Name,
+                AnswerOptions = q is MultipleChoiceQuestion mcq ? mcq.AnswerOptions : null,
+                CorrectAnswer = q is MultipleChoiceQuestion mcq2 ? mcq2.CorrectAnswer : null,
+                CorrectText = q is FillInTheBlankQuestion fib ? fib.CorrectText : null,
+                CaseSensitive = q is FillInTheBlankQuestion fib2 ? fib2.CaseSensitive : null
+            }).ToList();
+
+            var paged = new PagedResult<QuestionReadDto>
+            {
+                Items = dtos,
+                Total = total,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            return Ok(ApiResponse< Motqin.Dtos.Common.PagedResult<QuestionReadDto> >.Ok(paged));
         }
 
-        [HttpGet("Question/Get/{id:int}")]
-        public async Task<ActionResult<Question>> GetById(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ApiResponse<QuestionReadDto>>> GetById(int id)
         {
+            if (id <= 0) return BadRequest(ApiResponse<QuestionReadDto>.Fail("invalid_input", "id must be a positive integer."));
+
             var item = await _questionsService.GetByIdAsync(id);
-            if (item is null) return NotFound();
-            return Ok(item);
+            if (item is null) return NotFound(ApiResponse<QuestionReadDto>.Fail("not_found", "Question not found."));
+
+            var dto = new QuestionReadDto
+            {
+                QuestionID = item.QuestionID,
+                LessonID = item.LessonID,
+                QuestionCategory = item.QuestionCategory,
+                QuestionText = item.QuestionText,
+                DifficultyLevel = item.DifficultyLevel,
+                QuestionType = item.GetType().Name,
+                AnswerOptions = item is MultipleChoiceQuestion mcq ? mcq.AnswerOptions : null,
+                CorrectAnswer = item is MultipleChoiceQuestion mcq2 ? mcq2.CorrectAnswer : null,
+                CorrectText = item is FillInTheBlankQuestion fib ? fib.CorrectText : null,
+                CaseSensitive = item is FillInTheBlankQuestion fib2 ? fib2.CaseSensitive : null
+            };
+
+            return Ok(ApiResponse<QuestionReadDto>.Ok(dto));
         }
 
-        [HttpGet("get-by-lesson")]
-        public async Task<ActionResult<IEnumerable<Question>>> GetByLesson(int lessonId)
+        [HttpGet("by-lesson")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<QuestionReadDto>>>> GetByLesson([FromQuery] int lessonId)
         {
+            if (lessonId <= 0) return BadRequest(ApiResponse<IEnumerable<QuestionReadDto>>.Fail("invalid_input", "lessonId must be a positive integer."));
             var items = await _questionsService.GetByLessonIdAsync(lessonId);
-            return Ok(items);
+            var dtos = items.Select(item => new QuestionReadDto
+            {
+                QuestionID = item.QuestionID,
+                LessonID = item.LessonID,
+                QuestionCategory = item.QuestionCategory,
+                QuestionText = item.QuestionText,
+                DifficultyLevel = item.DifficultyLevel,
+                QuestionType = item.GetType().Name,
+                AnswerOptions = item is MultipleChoiceQuestion mcq ? mcq.AnswerOptions : null,
+                CorrectAnswer = item is MultipleChoiceQuestion mcq2 ? mcq2.CorrectAnswer : null,
+                CorrectText = item is FillInTheBlankQuestion fib ? fib.CorrectText : null,
+                CaseSensitive = item is FillInTheBlankQuestion fib2 ? fib2.CaseSensitive : null
+            });
+            return Ok(ApiResponse<IEnumerable<QuestionReadDto>>.Ok(dtos));
         }
 
-        [HttpGet("get-by-category-and-lesson")]
-        public async Task<ActionResult<IEnumerable<Question>>> GetByCategoryAndLesson(string category, int lessonId)
+        [HttpGet("by-category-and-lesson")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<QuestionReadDto>>>> GetByCategoryAndLesson([FromQuery] string category, [FromQuery] int lessonId)
         {
+            if (lessonId <= 0) return BadRequest(ApiResponse<IEnumerable<QuestionReadDto>>.Fail("invalid_input", "lessonId must be a positive integer."));
+            if (string.IsNullOrWhiteSpace(category)) return BadRequest(ApiResponse<IEnumerable<QuestionReadDto>>.Fail("invalid_input", "category is required."));
             var items = await _questionsService.GetByCategoryAndLessonIdAsync(category, lessonId);
-            return Ok(items);
+            var dtos = items.Select(item => new QuestionReadDto
+            {
+                QuestionID = item.QuestionID,
+                LessonID = item.LessonID,
+                QuestionCategory = item.QuestionCategory,
+                QuestionText = item.QuestionText,
+                DifficultyLevel = item.DifficultyLevel,
+                QuestionType = item.GetType().Name,
+                AnswerOptions = item is MultipleChoiceQuestion mcq ? mcq.AnswerOptions : null,
+                CorrectAnswer = item is MultipleChoiceQuestion mcq2 ? mcq2.CorrectAnswer : null,
+                CorrectText = item is FillInTheBlankQuestion fib ? fib.CorrectText : null,
+                CaseSensitive = item is FillInTheBlankQuestion fib2 ? fib2.CaseSensitive : null
+            });
+            return Ok(ApiResponse<IEnumerable<QuestionReadDto>>.Ok(dtos));
         }
-        [HttpGet("Start/{id:int}")]
-        public async Task<ActionResult<Question>> StartQuestion(int id,DateTime startTime)
+        [HttpPost("{id:int}/start")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<QuestionDetailsDto>>> StartQuestion(int id, [FromBody] StartQuestionDto dto)
         {
-            var question = await _questionsService.GetDetailsByIdAsync(id);
-            if (question is null) return NotFound();
-            question.StartTime = startTime;
-            return Ok(question);
+            if (id <= 0) return BadRequest(ApiResponse<QuestionDetailsDto>.Fail("invalid_input", "id must be a positive integer."));
+            if (dto == null) return BadRequest(ApiResponse<QuestionDetailsDto>.Fail("invalid_input", "body is required."));
+
+            var details = await _questionsService.StartQuestionAsync(id, dto.SessionId, dto.StartTime);
+            var outDto = new QuestionDetailsDto
+            {
+                DetailID = details.DetailID,
+                SessionID = details.SessionID,
+                QuestionID = details.QuestionID,
+                StartTime = details.StartTime,
+                EndTime = details.EndTime,
+                UserAnswer = details.UserAnswer,
+                IsCorrect = details.IsCorrect
+            };
+            return Ok(ApiResponse<QuestionDetailsDto>.Ok(outDto));
         }
-        [HttpGet("End/{id:int}")]
-        public async Task<ActionResult<Question>> EndQuestion(int id,DateTime endTime, string userAnswer, bool isCorrect)
+
+        [HttpPost("{id:int}/end")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<QuestionDetailsDto>>> EndQuestion(int id, [FromBody] EndQuestionDto dto)
         {
-            var question = await _questionsService.GetDetailsByIdAsync(id);
-            if (question is null) return NotFound();
-            question.EndTime = endTime;
-            question.UserAnswer = userAnswer;
-            question.IsCorrect = isCorrect;
-            return Ok(question);
+            if (id <= 0) return BadRequest(ApiResponse<QuestionDetailsDto>.Fail("invalid_input", "id must be a positive integer."));
+            if (dto == null) return BadRequest(ApiResponse<QuestionDetailsDto>.Fail("invalid_input", "body is required."));
+
+            var details = await _questionsService.EndQuestionAsync(id, dto.SessionId, dto.EndTime, dto.UserAnswer, dto.IsCorrect);
+            var outDto = new QuestionDetailsDto
+            {
+                DetailID = details.DetailID,
+                SessionID = details.SessionID,
+                QuestionID = details.QuestionID,
+                StartTime = details.StartTime,
+                EndTime = details.EndTime,
+                UserAnswer = details.UserAnswer,
+                IsCorrect = details.IsCorrect
+            };
+            return Ok(ApiResponse<QuestionDetailsDto>.Ok(outDto));
         }
         [HttpPost("mcq")]
-        public async Task<ActionResult<Question>> CreateMcq([FromBody] MultipleChoiceQuestionDto dto)
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<QuestionReadDto>>> CreateMcq([FromBody] MultipleChoiceQuestionDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<QuestionReadDto>.Fail("validation_error", "Invalid request body."));
+
+            if (await _questionsService.ExistsByTextAsync(dto.QuestionText, dto.LessonID))
+            {
+                return Conflict(ApiResponse<QuestionReadDto>.Fail("duplicate_resource", "A question with the same text already exists for this lesson."));
+            }
+
             var created = await _questionsService.CreateMultipleChoiceQuestionAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.QuestionID }, created);
+            var outDto = new QuestionReadDto
+            {
+                QuestionID = created.QuestionID,
+                LessonID = created.LessonID,
+                QuestionCategory = created.QuestionCategory,
+                QuestionText = created.QuestionText,
+                DifficultyLevel = created.DifficultyLevel,
+                QuestionType = created.GetType().Name,
+                AnswerOptions = created is MultipleChoiceQuestion mcq ? mcq.AnswerOptions : null,
+                CorrectAnswer = created is MultipleChoiceQuestion mcq2 ? mcq2.CorrectAnswer : null
+            };
+            return CreatedAtAction(nameof(GetById), new { id = created.QuestionID }, ApiResponse<QuestionReadDto>.Ok(outDto));
         }
 
         [HttpPost("fill")]
-        public async Task<ActionResult<Question>> CreateFill([FromBody] FillInTheBlankQuestionDto dto)
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<QuestionReadDto>>> CreateFill([FromBody] FillInTheBlankQuestionDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<QuestionReadDto>.Fail("validation_error", "Invalid request body."));
+
+            if (await _questionsService.ExistsByTextAsync(dto.QuestionText, dto.LessonID))
+            {
+                return Conflict(ApiResponse<QuestionReadDto>.Fail("duplicate_resource", "A question with the same text already exists for this lesson."));
+            }
+
             var created = await _questionsService.CreateFillInTheBlankQuestionAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.QuestionID }, created);
+            var outDto = new QuestionReadDto
+            {
+                QuestionID = created.QuestionID,
+                LessonID = created.LessonID,
+                QuestionCategory = created.QuestionCategory,
+                QuestionText = created.QuestionText,
+                DifficultyLevel = created.DifficultyLevel,
+                QuestionType = created.GetType().Name,
+                CorrectText = created is FillInTheBlankQuestion fib ? fib.CorrectText : null,
+                CaseSensitive = created is FillInTheBlankQuestion fib2 ? fib2.CaseSensitive : null
+            };
+            return CreatedAtAction(nameof(GetById), new { id = created.QuestionID }, ApiResponse<QuestionReadDto>.Ok(outDto));
         }
 
         [HttpPut("mcq/{id:int}")]
-        public async Task<IActionResult> UpdateMcq(int id, [FromBody] MultipleChoiceQuestionDto dto)
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<object>>> UpdateMcq(int id, [FromBody] MultipleChoiceQuestionDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (dto.QuestionID != id) return BadRequest("ID mismatch");
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<object>.Fail("validation_error", "Invalid request body."));
+            if (dto.QuestionID != id) return BadRequest(ApiResponse<object>.Fail("invalid_input", "ID mismatch."));
+
+            var existing = await _questionsService.GetByIdAsync(id);
+            if (existing is null) return NotFound(ApiResponse<object>.Fail("not_found", "Question not found."));
+
+            if (!string.Equals(existing.QuestionText, dto.QuestionText, System.StringComparison.OrdinalIgnoreCase)
+                && await _questionsService.ExistsByTextAsync(dto.QuestionText, dto.LessonID))
+            {
+                return Conflict(ApiResponse<object>.Fail("duplicate_resource", "Another question with the same text exists for this lesson."));
+            }
 
             var updated = await _questionsService.UpdateMultipleChoiceQuestionAsync(dto);
-            if (!updated) return NotFound();
+            if (!updated) return NotFound(ApiResponse<object>.Fail("not_found", "Question not found or update failed."));
             return NoContent();
         }
 
         [HttpPut("fill/{id:int}")]
-        public async Task<IActionResult> UpdateFill(int id, [FromBody] FillInTheBlankQuestionDto dto)
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<object>>> UpdateFill(int id, [FromBody] FillInTheBlankQuestionDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (dto.QuestionID != id) return BadRequest("ID mismatch");
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<object>.Fail("validation_error", "Invalid request body."));
+            if (dto.QuestionID != id) return BadRequest(ApiResponse<object>.Fail("invalid_input", "ID mismatch."));
+
+            var existing = await _questionsService.GetByIdAsync(id);
+            if (existing is null) return NotFound(ApiResponse<object>.Fail("not_found", "Question not found."));
+
+            if (!string.Equals(existing.QuestionText, dto.QuestionText, System.StringComparison.OrdinalIgnoreCase)
+                && await _questionsService.ExistsByTextAsync(dto.QuestionText, dto.LessonID))
+            {
+                return Conflict(ApiResponse<object>.Fail("duplicate_resource", "Another question with the same text exists for this lesson."));
+            }
 
             var updated = await _questionsService.UpdateFillInTheBlankQuestionAsync(dto);
-            if (!updated) return NotFound();
+            if (!updated) return NotFound(ApiResponse<object>.Fail("not_found", "Question not found or update failed."));
             return NoContent();
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<object>>> Delete(int id)
         {
+            if (id <= 0) return BadRequest(ApiResponse<object>.Fail("invalid_input", "id must be a positive integer."));
+
             var deleted = await _questionsService.DeleteAsync(id);
-            if (!deleted) return NotFound();
-            return NoContent();
-        }
-        [HttpDelete("U/{id:int}")]
-        public async Task<IActionResult> DeleteUserQuestion(int id,string UserId)
-        {
-            await _questionsService.UserDeleteQuestion(id, UserId);
+            if (!deleted) return NotFound(ApiResponse<object>.Fail("not_found", "Question not found."));
             return NoContent();
         }
 
-        [HttpPost("U/Fill")]
-        public async Task<ActionResult<UserAddedQuestion>> UserAddFill([FromBody] FillInTheBlankQuestionDto dto)
+        [HttpDelete("user/{id:int}")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<object>>> DeleteUserQuestion(int id, [FromQuery] string userId)
         {
-            var question = new UserAddedQuestion
-            {
-                LessonID = dto.LessonID,
-                DisplayOrder = 0,
-                Priority = 2,
-                QuestionCategory = dto.QuestionCategory,
-                QuestionText = dto.QuestionText,
-                DifficultyLevel = dto.DifficultyLevel
-            };
-            await _questionsService.UserAddQuestion(question);
-            return CreatedAtAction(nameof(GetById), new { id = question.ID }, question);
+            if (id <= 0) return BadRequest(ApiResponse<object>.Fail("invalid_input", "id must be a positive integer."));
+            if (string.IsNullOrWhiteSpace(userId)) return BadRequest(ApiResponse<object>.Fail("invalid_input", "userId is required."));
+
+            await _questionsService.UserDeleteQuestion(id, userId);
+            return NoContent();
         }
-        [HttpPost("U/MCQ")]
-        public async Task<ActionResult<UserAddedQuestion>> UserAddMCQ([FromBody] MultipleChoiceQuestionDto dto)
+
+        [HttpPost("user/fill")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<UserAddedQuestion>>> UserAddFill([FromBody] FillInTheBlankQuestionDto dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<UserAddedQuestion>.Fail("validation_error", "Invalid request body."));
+
             var question = new UserAddedQuestion
             {
                 LessonID = dto.LessonID,
@@ -142,7 +289,26 @@ namespace Motqin.Controllers
                 DifficultyLevel = dto.DifficultyLevel
             };
             await _questionsService.UserAddQuestion(question);
-            return CreatedAtAction(nameof(GetById), new { id = question.ID }, question);
+            return CreatedAtAction(nameof(GetById), new { id = question.ID }, ApiResponse<UserAddedQuestion>.Ok(question));
+        }
+
+        [HttpPost("user/mcq")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<UserAddedQuestion>>> UserAddMCQ([FromBody] MultipleChoiceQuestionDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ApiResponse<UserAddedQuestion>.Fail("validation_error", "Invalid request body."));
+
+            var question = new UserAddedQuestion
+            {
+                LessonID = dto.LessonID,
+                DisplayOrder = 0,
+                Priority = 2,
+                QuestionCategory = dto.QuestionCategory,
+                QuestionText = dto.QuestionText,
+                DifficultyLevel = dto.DifficultyLevel
+            };
+            await _questionsService.UserAddQuestion(question);
+            return CreatedAtAction(nameof(GetById), new { id = question.ID }, ApiResponse<UserAddedQuestion>.Ok(question));
         }
     }
 }

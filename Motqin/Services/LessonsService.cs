@@ -8,6 +8,7 @@ namespace Motqin.Services
     {
         Task<IEnumerable<Lesson>> GetAllAsync(int subjectId);
         Task<Lesson?> GetByIdAsync(int id);
+        Task<bool> ExistsAsync(string title, int subjectId);
         Task CreateAsync(Lesson lesson);
         Task UpdateAsync(Lesson lesson);
         Task DeleteAsync(int id);
@@ -23,6 +24,9 @@ namespace Motqin.Services
 
         public async Task<Lesson?> GetByIdAsync(int id) =>
             await _context.Lessons.FindAsync(id);
+
+        public async Task<bool> ExistsAsync(string title, int subjectId) =>
+            await _context.Lessons.AnyAsync(l => l.SubjectID == subjectId && l.Title == title);
 
         public async Task CreateAsync(Lesson lesson)
         {

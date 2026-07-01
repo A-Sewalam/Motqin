@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.SemanticKernel;
 using Motqin.Data;
+using Motqin.Middlewares;
 using Motqin.Models;
 using Motqin.Services;
 using Motqin.Services.Payment;
@@ -133,6 +134,8 @@ namespace Motqin
                 app.UseSwagger();
                 app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"));
             }
+            app.UseMiddleware<ExceptionsMiddleware>(); // Add global exception handling middleware
+
             app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
