@@ -35,7 +35,7 @@ public class QuestionTest : IntegrationTestBase
         {
             seededQuestion = new MultipleChoiceQuestion
             {
-                LessonID = lesson.LessonID,
+                LessonID = lesson.LessonId,
                 QuestionText = "Small?",
                 AnswerOptions = "A,B,C",
                 CorrectAnswer = "A",
@@ -47,7 +47,7 @@ public class QuestionTest : IntegrationTestBase
         {
             seededQuestion = new FillInTheBlankQuestion
             {
-                LessonID = lesson.LessonID,
+                LessonID = lesson.LessonId,
                 QuestionText = "Unit of ___",
                 CorrectText = "Matter",
                 CaseSensitive = true,
@@ -107,7 +107,7 @@ public class QuestionTest : IntegrationTestBase
         // 2. Seed a mix of questions
         var q1 = new MultipleChoiceQuestion
         {
-            LessonID = targetLesson.LessonID,
+            LessonID = targetLesson.LessonId,
             QuestionText = "Choice Q",
             AnswerOptions = "A,B",
             CorrectAnswer = "A",
@@ -116,7 +116,7 @@ public class QuestionTest : IntegrationTestBase
         };
         var q2 = new FillInTheBlankQuestion
         {
-            LessonID = targetLesson.LessonID,
+            LessonID = targetLesson.LessonId,
             QuestionText = "Blank Q",
             CorrectText = "Nucleus",
             QuestionCategory = "Advanced",
@@ -124,7 +124,7 @@ public class QuestionTest : IntegrationTestBase
         };
         var q3 = new MultipleChoiceQuestion
         {
-            LessonID = otherLesson.LessonID, // Different lesson!
+            LessonID = otherLesson.LessonId, // Different lesson!
             QuestionText = "Should not appear",
             AnswerOptions = "X,Y",
             CorrectAnswer = "X",
@@ -137,7 +137,7 @@ public class QuestionTest : IntegrationTestBase
         DbContext.ChangeTracker.Clear();
 
         // 3. Act
-        var response = await Client.GetAsync($"/api/questions/get-by-lesson?lessonId={targetLesson.LessonID}");
+        var response = await Client.GetAsync($"/api/questions/get-by-lesson?lessonId={targetLesson.LessonId}");
 
         // 4. Assert
         response.EnsureSuccessStatusCode();
@@ -185,7 +185,7 @@ public class QuestionTest : IntegrationTestBase
         // 2. Seed the Grid
         var match = new MultipleChoiceQuestion
         {
-            LessonID = lesson1.LessonID,
+            LessonID = lesson1.LessonId,
             QuestionCategory = "Advanced",
             QuestionText = "Match Me",
             AnswerOptions = "A,B",
@@ -194,7 +194,7 @@ public class QuestionTest : IntegrationTestBase
         };
         var wrongCategory = new FillInTheBlankQuestion
         {
-            LessonID = lesson1.LessonID,
+            LessonID = lesson1.LessonId,
             QuestionCategory = "Basic", // Wrong Category
             QuestionText = "Don't Match Category",
             CorrectText = "Test",
@@ -202,7 +202,7 @@ public class QuestionTest : IntegrationTestBase
         };
         var wrongLesson = new MultipleChoiceQuestion
         {
-            LessonID = lesson2.LessonID, // Wrong Lesson
+            LessonID = lesson2.LessonId, // Wrong Lesson
             QuestionCategory = "Advanced",
             QuestionText = "Don't Match Lesson",
             AnswerOptions = "X,Y",
@@ -215,7 +215,7 @@ public class QuestionTest : IntegrationTestBase
         DbContext.ChangeTracker.Clear();
 
         // 3. Act
-        var response = await Client.GetAsync($"/api/questions/get-by-category-and-lesson?category=Advanced&lessonId={lesson1.LessonID}");
+        var response = await Client.GetAsync($"/api/questions/get-by-category-and-lesson?category=Advanced&lessonId={lesson1.LessonId}");
 
         // 4. Assert
         response.EnsureSuccessStatusCode();
@@ -244,7 +244,7 @@ public class QuestionTest : IntegrationTestBase
 
         var mcqDto = new
         {
-            LessonID = lesson.LessonID,
+            LessonID = lesson.LessonId,
             QuestionCategory = "Basic",
             QuestionText = "What is the symbol for Gold?",
             DifficultyLevel = "Medium",
@@ -305,7 +305,7 @@ public class QuestionTest : IntegrationTestBase
 
         var fillDto = new
         {
-            LessonID = lesson.LessonID,
+            LessonID = lesson.LessonId,
             QuestionCategory = "Basic",
             QuestionText = "The cat sat on the ___.",
             DifficultyLevel = "Easy",
@@ -368,7 +368,7 @@ public class QuestionTest : IntegrationTestBase
 
         var question = new MultipleChoiceQuestion
         {
-            LessonID = lesson.LessonID,
+            LessonID = lesson.LessonId,
             QuestionText = "To be deleted",
             AnswerOptions = "A,B",
             CorrectAnswer = "A",

@@ -70,14 +70,14 @@ public class LessonTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // 3. Act
-        var response = await Client.GetAsync($"/api/lessons/{testLesson.LessonID}");
+        var response = await Client.GetAsync($"/api/lessons/{testLesson.LessonId}");
 
         // 4. Assert
         response.EnsureSuccessStatusCode();
         var returnedDto = await response.Content.ReadFromJsonAsync<LessonReadDto>();
 
         Assert.NotNull(returnedDto);
-        Assert.Equal(testLesson.LessonID, returnedDto.LessonId);
+        Assert.Equal(testLesson.LessonId, returnedDto.LessonId);
         Assert.Equal(testLesson.Title , returnedDto.Title);
         Assert.Equal(subject.SubjectID, returnedDto.SubjectID);
     }
@@ -125,7 +125,7 @@ public class LessonTests : IntegrationTestBase
         Assert.Contains($"/api/lessons/{returnedDto.LessonId}",response.Headers.Location.ToString(),StringComparison.OrdinalIgnoreCase);
 
         // 4. Verify Database Persistence
-        var dbLesson = await DbContext.Lessons.FirstOrDefaultAsync(l => l.LessonID == returnedDto.LessonId);
+        var dbLesson = await DbContext.Lessons.FirstOrDefaultAsync(l => l.LessonId == returnedDto.LessonId);
 
         Assert.NotNull(dbLesson);
         Assert.Equal(subject.SubjectID, dbLesson.SubjectID);
@@ -171,13 +171,13 @@ public class LessonTests : IntegrationTestBase
         var updateDto = new { Title = "New Title", SubjectID = subject2.SubjectID };
 
         // 2. Act
-        var response = await Client.PutAsJsonAsync($"/api/lessons/{lesson.LessonID}", updateDto);
+        var response = await Client.PutAsJsonAsync($"/api/lessons/{lesson.LessonId}", updateDto);
 
         // 3. Assert
         Assert.Equal(System.Net.HttpStatusCode.NoContent, response.StatusCode);
 
         // Verify the changes in the DB
-        var updatedLesson = await DbContext.Lessons.FindAsync(lesson.LessonID);
+        var updatedLesson = await DbContext.Lessons.FindAsync(lesson.LessonId);
         Assert.Equal("New Title", updatedLesson.Title);
         Assert.Equal(subject2.SubjectID, updatedLesson.SubjectID);
     }
@@ -199,7 +199,7 @@ public class LessonTests : IntegrationTestBase
         var badUpdate = new { Title = invalid == "invalid-title"? "" : "Updated", SubjectID = invalid == "invalid-subjectid" ? 9999 : lesson.SubjectID }; // Invalid ID
 
         // Act
-        var response = await Client.PutAsJsonAsync($"/api/lessons/{lesson.LessonID}", badUpdate);
+        var response = await Client.PutAsJsonAsync($"/api/lessons/{lesson.LessonId}", badUpdate);
 
         // Assert
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
@@ -218,13 +218,13 @@ public class LessonTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // 2. Act
-        var response = await Client.DeleteAsync($"/api/lessons/{lesson.LessonID}");
+        var response = await Client.DeleteAsync($"/api/lessons/{lesson.LessonId}");
 
         // 3. Assert
         Assert.Equal(System.Net.HttpStatusCode.NoContent, response.StatusCode);
 
         // Verify Lesson is deleted
-        var exists = await DbContext.Lessons.AnyAsync(l => l.LessonID == lesson.LessonID);
+        var exists = await DbContext.Lessons.AnyAsync(l => l.LessonId == lesson.LessonId);
         Assert.False(exists);
         // Verify Subject still exists (Critical check!)
         var parentSubject = await DbContext.Subjects.FindAsync(subject.SubjectID);

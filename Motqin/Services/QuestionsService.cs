@@ -67,7 +67,7 @@ namespace Motqin.Services
         public async Task<Question> CreateMultipleChoiceQuestionAsync(MultipleChoiceQuestionDto questionDto)
         {
             var lessonExists = await _context.Lessons
-                    .AnyAsync(l => l.LessonID == questionDto.LessonID);
+                    .AnyAsync(l => l.LessonId == questionDto.LessonID);
             if (!lessonExists)
                 throw new Exception("Lesson not found");
 
@@ -89,7 +89,7 @@ namespace Motqin.Services
         public async Task<Question> CreateFillInTheBlankQuestionAsync(FillInTheBlankQuestionDto questionDto)
         {
             var lessonExists = await _context.Lessons
-                    .AnyAsync(l => l.LessonID == questionDto.LessonID);
+                    .AnyAsync(l => l.LessonId == questionDto.LessonID);
             if (!lessonExists)
                 throw new Exception("Lesson not found");
 

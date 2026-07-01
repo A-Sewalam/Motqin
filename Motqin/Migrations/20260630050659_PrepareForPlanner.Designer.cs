@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Motqin.Data;
 
@@ -11,9 +12,11 @@ using Motqin.Data;
 namespace Motqin.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260630050659_PrepareForPlanner")]
+    partial class PrepareForPlanner
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,11 +280,11 @@ namespace Motqin.Migrations
 
             modelBuilder.Entity("Motqin.Models.Lesson", b =>
                 {
-                    b.Property<int>("LessonId")
+                    b.Property<int>("LessonID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LessonId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LessonID"));
 
                     b.Property<int>("Difficulty")
                         .HasColumnType("int");
@@ -297,7 +300,7 @@ namespace Motqin.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.HasKey("LessonId");
+                    b.HasKey("LessonID");
 
                     b.HasIndex("SubjectID");
 
@@ -478,39 +481,6 @@ namespace Motqin.Migrations
                     b.ToTable("QuestionDetails");
                 });
 
-            modelBuilder.Entity("Motqin.Models.Session.SpacedRepetitionSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateOnly>("LastReviewDate")
-                        .HasColumnType("date");
-
-                    b.Property<int>("LessonId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RepetitionNumber")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LessonId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SpacedRepetitionSessions");
-                });
-
             modelBuilder.Entity("Motqin.Models.Session.StudySession", b =>
                 {
                     b.Property<int>("Id")
@@ -522,32 +492,19 @@ namespace Motqin.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("nvarchar(34)");
+
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("time");
 
                     b.Property<int>("LessonID")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("PlannedDate")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly>("PlannedEndTime")
-                        .HasColumnType("time");
-
-                    b.Property<TimeOnly>("PlannedStartTime")
-                        .HasColumnType("time");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SpacesRepititionSessionId")
-                        .HasColumnType("int");
-
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time");
-
-                    b.Property<byte>("Status")
-                        .HasColumnType("tinyint");
 
                     b.Property<string>("UserID")
                         .IsRequired()
@@ -555,13 +512,11 @@ namespace Motqin.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LessonID");
-
-                    b.HasIndex("SpacesRepititionSessionId");
-
-                    b.HasIndex("UserID");
-
                     b.ToTable("StudySessions");
+
+                    b.HasDiscriminator().HasValue("StudySession");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Motqin.Models.StudyPlan", b =>
@@ -919,6 +874,23 @@ namespace Motqin.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("Motqin.Models.Session.SpacedRepetitionSession", b =>
+                {
+                    b.HasBaseType("Motqin.Models.Session.StudySession");
+
+                    b.Property<int>("RepetitionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.HasIndex("LessonID");
+
+                    b.HasIndex("UserID");
+
+                    b.HasDiscriminator().HasValue("SpacedRepetitionSession");
+                });
+
             modelBuilder.Entity("FillInTheBlankQuestion", b =>
                 {
                     b.HasBaseType("Question");
@@ -1104,50 +1076,6 @@ namespace Motqin.Migrations
                     b.Navigation("StudySession");
                 });
 
-            modelBuilder.Entity("Motqin.Models.Session.SpacedRepetitionSession", b =>
-                {
-                    b.HasOne("Motqin.Models.Lesson", "Lesson")
-                        .WithMany("StudySessions")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Motqin.Models.User", "User")
-                        .WithMany("StudySessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Lesson");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Motqin.Models.Session.StudySession", b =>
-                {
-                    b.HasOne("Motqin.Models.Lesson", "Lesson")
-                        .WithMany()
-                        .HasForeignKey("LessonID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Motqin.Models.Session.SpacedRepetitionSession", "SpacedRepetitionSession")
-                        .WithMany("StudySessions")
-                        .HasForeignKey("SpacesRepititionSessionId");
-
-                    b.HasOne("Motqin.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lesson");
-
-                    b.Navigation("SpacedRepetitionSession");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Motqin.Models.StudyPlan", b =>
                 {
                     b.HasOne("Motqin.Models.Lesson", "Lesson")
@@ -1246,6 +1174,25 @@ namespace Motqin.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Motqin.Models.Session.SpacedRepetitionSession", b =>
+                {
+                    b.HasOne("Motqin.Models.Lesson", "Lesson")
+                        .WithMany("StudySessions")
+                        .HasForeignKey("LessonID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Motqin.Models.User", "User")
+                        .WithMany("StudySessions")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Motqin.Models.Competition", b =>
                 {
                     b.Navigation("CompetitionEntries");
@@ -1265,11 +1212,6 @@ namespace Motqin.Migrations
             modelBuilder.Entity("Motqin.Models.Payment.Wallet", b =>
                 {
                     b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("Motqin.Models.Session.SpacedRepetitionSession", b =>
-                {
-                    b.Navigation("StudySessions");
                 });
 
             modelBuilder.Entity("Motqin.Models.Subject", b =>

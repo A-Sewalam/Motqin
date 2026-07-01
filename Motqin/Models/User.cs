@@ -27,5 +27,7 @@ namespace Motqin.Models
         // for payment
         public virtual Wallet Wallet { get; set; } = null!;
         public virtual ICollection<UserSubscription> Subscriptions { get; set; } = new List<UserSubscription>();
+
+        public virtual ICollection<UserLessons> ToBeStudiedLessons { get; set; } = [];
     }
 }

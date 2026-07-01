@@ -7,32 +7,25 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Motqin.Models.Session
 {
-    public class SpacedRepetitionSession : Session
+    public class SpacedRepetitionSession 
     {
-
-        [Required]
-        public int SubjectID { get; set; }
-
-        [Required]
-        public int LessonID { get; set; }
-
-        [Required]
-        public string QuestionsCategory { get; set; }
+        [Key]
+        public int Id { get; set; }
 
         public int RepetitionNumber { get; set; } = 0;
 
-        public StudySessionStatuses StudySessionStatuses { get; set; }
-
         public int Score { get; set; }
 
-        // Navigation Properties
+        public DateOnly LastReviewDate { get; set; }
 
-        [ForeignKey("SubjectID")]
-        public virtual Lesson Subject { get; set; }
+        public ICollection<StudySession> StudySessions { get; set; } = [];
 
-        [ForeignKey("LessonID")]
-        public virtual Lesson Lesson { get; set; }
+        public string UserId { get; set; }
+        [ForeignKey("UserId")]
+        public User User { get; set; }
 
-        public virtual ICollection<QuestionDetails> QuestionDetails { get; set; } = new List<QuestionDetails>();
+        public int LessonId {  get; set; }
+        [ForeignKey("LessonId")]
+        public Lesson Lesson { get; set; }
     }
 }
