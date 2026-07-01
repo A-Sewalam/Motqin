@@ -20,7 +20,7 @@ namespace Motqin.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthenticationController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -30,7 +30,7 @@ namespace Motqin.Controllers
         private readonly IEmailService _emailService;
 
 
-        public AuthenticationController(UserManager<User> userManager,
+        public AuthController(UserManager<User> userManager,
             RoleManager<IdentityRole> roleManager,
             AppDbContext context,
             IConfiguration configuration,
@@ -114,7 +114,7 @@ namespace Motqin.Controllers
             return BadRequest("User could not be created");
         }
 
-        [HttpPost("VerifyEmailAuthority")]
+        [HttpPost("verify-email-authority")]
         public async Task<IActionResult> VerifyEmailAuthority(string? email, string? code) // we can make Dto
         {
             // 1. Validate the input payload
